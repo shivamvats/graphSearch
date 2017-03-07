@@ -29,6 +29,9 @@ class ImageVisualizer(Visualizer):
         # Following (r, c) convention.
         self.plottedImage[point[0], point[1]] = color
 
+    def drawCircle(self, center, radius):
+        cv.circle(self.plottedImage, (center[1], center[0]), radius, (50, 50, 50))
+
     def displayImage(self, waitTime=0):
         cv.imshow("Image", self.plottedImage)
         cv.waitKey(waitTime)
