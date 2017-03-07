@@ -12,7 +12,7 @@ class Astar(object):
         else:
             return 0
 
-    def plan(self, startNode, goalNode, heuristic):
+    def plan(self, startNode, goalNode, heuristic, viz=None):
         self.startNode = startNode
         self.goalNode = goalNode
 
@@ -26,11 +26,17 @@ class Astar(object):
         openQ.put((startNode.getH() + startNode.getG(), startNode))
 
         currNode = startNode
-        while(not openQ.empty() and currNode.getNodeId() !=
-                self.goalNode.getNodeId()):
+        while(not openQ.empty() and currNode != self.goalNode):
             priority, currNode = openQ.get()
+            if currNode in closed:
+                continue
             closed.append(currNode)
-            #print(currNode.getNodeId())
+            
+            #if viz is not None:
+            viz.markPoint(self.env.getPointFromId(currNode.getNodeId()), 0)
+            viz.displayImage(1)
+            #print(openQ.qsize())
+            #print(currNode.getH())
             
             children, edgeCosts = self.env.getChildrenAndCosts(currNode)
             for child, edgeCost in zip(children, edgeCosts):
@@ -46,9 +52,11 @@ class Astar(object):
                     child.setParent(currNode)
                 #XXX What if this node is already in the open list?
                 openQ.put((child.getG() + child.getH(), child))
-                print(child.getNodeId())
-            time.sleep(1)
-            print("___")
+
+        if currNode.getNodeId() == self.goalNode.getNodeId():
+            return 1
+        else:
+            return 0
 
 
 

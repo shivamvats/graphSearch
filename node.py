@@ -25,6 +25,9 @@ class Node():
     def getNodeId(self):
         return self.nodeId
 
+    def getParent(self):
+        return self.parent
+
 
     # Where to put environment details?
     # Are things like the children function and heuristic properties of the node

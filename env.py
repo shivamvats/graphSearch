@@ -4,12 +4,21 @@ class Environment(object):
     def __init__(self, envMap):
         self.envMap = envMap
 
+    def isValidPoint(self, point):
+        pass
+
 class GridEnvironment(Environment):
     def __init__(self, envMap, rows, cols):
         super(GridEnvironment, self).__init__(envMap)
         self.rows = rows
         self.cols = cols
         self.graph = {}
+
+    def isValidPoint(self, point):
+        if self.envMap[point[0], point[1]] < 50:
+            return False
+        else:
+            return True
 
     def getNeighbours(self, row, col):
         """Returns 8 connected neighbours from the grid. Does validity check f
@@ -19,15 +28,16 @@ class GridEnvironment(Environment):
         for i in [-1, 0, 1]:
             for j in [-1, 0, 1]:
                 if(not(i == 0 and j == 0)):
-                    x = row + i
-                    y = col + j
-                    if((x >= 0) and (x < self.rows) and (y >= 0) and (y <
+                    r = row + i
+                    c = col + j
+                    if((r >= 0) and (r < self.rows) and (c >= 0) and (c <
                         self.cols)):
-                        neighbours.append((x, y))
-                        if(i == 0 or j == 0):
-                            edgeCosts.append(1)
-                        else:
-                            edgeCosts.append(2)
+                        if self.isValidPoint((r, c)):
+                            neighbours.append((r, c))
+                            if(i == 0 or j == 0):
+                                edgeCosts.append(1)
+                            else:
+                                edgeCosts.append(2)
         #print(neighbours)
         return (neighbours, edgeCosts)
 
@@ -52,8 +62,11 @@ class GridEnvironment(Environment):
         return (childrenNodes, edgeCosts)
 
     def getIdFromPoint(self, gridPoint):
-        return gridPoint[0]*self.rows + gridPoint[1]
+        return gridPoint[0]*self.cols + gridPoint[1]
 
     def getPointFromId(self, Id):
-        return (Id//self.rows, Id%self.rows)
+        return (Id//self.cols, Id%self.cols)
+
+    def addNode(self, newNode):
+        self.graph[newNode.getNodeId()] = newNode
 
