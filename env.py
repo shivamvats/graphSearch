@@ -40,10 +40,12 @@ class GridEnvironment(Environment):
                         self.cols)):
                         if self.isValidPoint((r, c)):
                             neighbours.append((r, c))
-                            if(i == 0 or j == 0):
+                            if(i == 0):
+                                edgeCosts.append(1)
+                            elif j == 0:
                                 edgeCosts.append(1)
                             else:
-                                edgeCosts.append(1.5)
+                                edgeCosts.append(2)
         #print(neighbours)
         return (neighbours, edgeCosts)
 
@@ -66,7 +68,7 @@ class GridEnvironment(Environment):
                 self.graph[nodeId] = childNode
                 childrenNodes.append(childNode)
 
-        return (childrenNodes, edgeCosts, flag)
+        return (childrenNodes, edgeCosts)
 
     def getIdFromPoint(self, gridPoint):
         return gridPoint[0]*self.cols + gridPoint[1]
@@ -145,7 +147,7 @@ class IslandGridEnvironment(GridEnvironment):
     def getIslandThresh(self):
         return self.islandThresh
 
-    def getChildrenAndCosts(self, node):
+    def getChildrenWithIslandsAndCosts(self, node):
         if(not self.graph.has_key(node.getNodeId())):
             self.graph[node.getNodeId()] = node
         point = self.getPointFromId(node.getNodeId())
@@ -175,5 +177,8 @@ class IslandGridEnvironment(GridEnvironment):
                 edgeCosts.append(cost)
                 flag = 1
                 break
+        if node.checkDummyG():
+            for childNode in childrenNodes:
+                childNode.setHasDummyG(True)
 
         return (childrenNodes, edgeCosts, flag)

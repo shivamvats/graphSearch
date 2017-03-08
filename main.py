@@ -1,8 +1,29 @@
-from astar import Astar
+from astar import Astar, IslandAstar
 from env import GridEnvironment, IslandGridEnvironment
 from node import Node
 from occupancyGrid import OccupancyGrid
 from visualizer import ImageVisualizer
+
+import cv2 as cv
+
+
+clickedR, clickedC = -1, -1
+def inputClickedPoint(image):
+    def clickCallback(event, x, y, flags, param):
+        global clickedR, clickedC
+        if event == cv.EVENT_LBUTTONDOWN:
+            clickedC, clickedR = (x, y)
+
+    cv.namedWindow("image")
+    cv.setMouseCallback("image", clickCallback)
+    cv.imshow("image", image)
+    cv.waitKey(0)
+    cv.destroyAllWindows()
+    return (clickedR, clickedC)
+
+def pointToRC(point):
+    pointAsRC = (point[1], point[0])
+    return pointAsRC
 
 
 def main():
@@ -12,46 +33,60 @@ def main():
     occGrid = OccupancyGrid()
     occMap = occGrid.getMapFromImage("../data/testMapSmall.png")
     print(occMap.shape)
-    #gridEnv = GridEnvironment(occMap, occMap.shape[0], occMap.shape[1])
-    #gridEnv.setHeuristic(1)
+
+    useIslands = 1
+
+    if not useIslands:
+        gridEnv = GridEnvironment(occMap, occMap.shape[0], occMap.shape[1])
+        gridEnv.setHeuristic(0)
 
     viz = ImageVisualizer(occMap)
-
 
     ###
     # Island related stuff
     ###
-    islands = [(140, 100),]
-    gridEnv = IslandGridEnvironment(occMap, occMap.shape[0], occMap.shape[1],
-            islands)
-    gridEnv.setHeuristic(1)
-    gridEnv.setIslandThresh(50)
-    for island in gridEnv.getIslandNodes():
-        viz.drawCircle(gridEnv.getPointFromId(island.getNodeId()), 50)
-        viz.displayImage(1)
+    #"""
+    if useIslands:
+        #islands = [(140, 100),]
+        islands = []
+        numIslands = 1
+        for i in range(numIslands):
+            print("Click on an island")
+            island = inputClickedPoint(occMap)
+            islands.append(island)
+        gridEnv = IslandGridEnvironment(occMap, occMap.shape[0], occMap.shape[1],
+                islands)
+        gridEnv.setHeuristic(1)
+        gridEnv.setIslandThresh(50)
+        for island in gridEnv.getIslandNodes():
+            viz.drawCircle(gridEnv.getPointFromId(island.getNodeId()), 50)
+            viz.displayImage(1)
+        cv.destroyAllWindows()
         
+    #"""
 
     ###
 
-    startPoint = (100, 20)
-    goalPoint = (201, 200)
+
+    #startPoint = (100, 20)
+    #goalPoint = (201, 200)
+    print("Click start point")
+    startPoint = inputClickedPoint(occMap)
+    print("Click end point")
+    goalPoint = inputClickedPoint(occMap)
+    print(startPoint, goalPoint)
     assert(gridEnv.isValidPoint(startPoint))
     assert(gridEnv.isValidPoint(goalPoint))
-    #goalPoint = (500, 50)
-
-    #TEST
-    goalId = gridEnv.getIdFromPoint(goalPoint)
-    print(goalId)
-    goal = gridEnv.getPointFromId(goalId)
-    print(goal, goalPoint)
 
     startNode = Node(gridEnv.getIdFromPoint(startPoint))
     startNode.setParent(None)
     goalNode = Node(gridEnv.getIdFromPoint(goalPoint))
-
     gridEnv.addNode(goalNode)
 
-    planner = Astar(gridEnv)
+    if useIslands:
+        planner = IslandAstar(gridEnv)
+    else:
+        planner = Astar(gridEnv)
     planFound = planner.plan(startNode, goalNode, viz=viz)
 
     path = []

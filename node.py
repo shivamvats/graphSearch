@@ -7,6 +7,8 @@ class Node():
         self.h = float("inf")
         self.nodeId = nodeId
 
+        self.hasDummyG = False
+
     def setG(self, newG):
         self.g = newG
 
@@ -27,6 +29,24 @@ class Node():
 
     def getParent(self):
         return self.parent
+
+    def setHasDummyG(self, value):
+        self.hasDummyG = value
+
+    def checkDummyG(self):
+        return self.hasDummyG
+
+
+class IslandNode(Node):
+    def __init__(self, nodeId, hasDummyG=False):
+        super(IslandNode, self).__init__(nodeId)
+        self.dummyG = float("inf")
+        if hasDummyG:
+            self.hasDummyG = True
+        else:
+            self.hasDummyG = False
+
+    #def getG(self, newG):
 
 
     # Where to put environment details?
