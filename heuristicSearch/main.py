@@ -57,9 +57,9 @@ def main():
         gridEnv = IslandGridEnvironment(occMap, occMap.shape[0], occMap.shape[1],
                 islands)
         gridEnv.setHeuristic(1)
-        gridEnv.setIslandThresh(50)
+        gridEnv.setIslandThresh(80)
         for island in gridEnv.getIslandNodes():
-            viz.drawCircle(gridEnv.getPointFromId(island.getNodeId()), 50)
+            viz.drawCircle(gridEnv.getPointFromId(island.getNodeId()), 80)
             viz.displayImage(1)
         cv.destroyAllWindows()
         

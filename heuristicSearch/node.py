@@ -37,7 +37,7 @@ class Node():
         return self.hasDummyG
 
 
-class IslandNode(Node):
+class SkipEdgesNode(Node):
     def __init__(self, nodeId, hasDummyG=False):
         super(IslandNode, self).__init__(nodeId)
         self.dummyG = float("inf")
@@ -45,6 +45,19 @@ class IslandNode(Node):
             self.hasDummyG = True
         else:
             self.hasDummyG = False
+
+class IslandNode(Node):
+    def __init__(self, nodeId, viaIsland=False):
+        super(IslandNode, self).__init__(nodeId)
+
+        self.viaIsland = viaIsland
+
+    def setViaIsland(self, viaIsland):
+        self.viaIsland = viaIsland
+
+    def isViaIsland(self):
+        return self.viaIsland
+
 
     #def getG(self, newG):
 
