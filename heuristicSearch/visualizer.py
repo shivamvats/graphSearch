@@ -29,6 +29,13 @@ class ImageVisualizer(Visualizer):
         # Following (r, c) convention.
         self.plottedImage[point[0], point[1]] = color
 
+    def markPoints(self, points, color):
+        # Following (r, c) convention.
+        points = np.array(points)#.flatten()
+        #print(points)
+        print(points[:,0])
+        self.plottedImage[points[:,0], points[:,1]] = color
+
     def drawCircle(self, center, radius):
         #self.plottedImage = cv.circle(self.plottedImage, (center[1], center[0]), radius, (50, 50, 50))
         cv.circle(self.plottedImage, (center[1], center[0]), radius, (50, 50, 50))

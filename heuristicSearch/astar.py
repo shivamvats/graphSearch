@@ -1,5 +1,6 @@
 import Queue as Q
 import time
+from functools import partial
 
 class Astar(object):
     def __init__(self, env):
@@ -12,6 +13,7 @@ class Astar(object):
         else:
             return 0
 
+    #@profile
     def plan(self, startNode, goalNode, viz=None):
         self.startNode = startNode
         self.goalNode = goalNode
@@ -21,31 +23,32 @@ class Astar(object):
         startNode.setH(heuristicCost)
 
         openQ = Q.PriorityQueue()
-        closed = []
+        # Using a dictionary 'cos list has slow lookup.
+        closed = {}
 
         openQ.put((startNode.getH() + startNode.getG(), startNode))
 
         currNode = startNode
+        t = 0
         while(not openQ.empty() and currNode != self.goalNode):
             priority, currNode = openQ.get()
-            if currNode in closed:
+            nodeId = currNode.getNodeId()
+            if nodeId in closed:
                 continue
-            closed.append(currNode)
+            closed[nodeId] = 1
 
-            #if viz is not None:
-            viz.markPoint(self.env.getPointFromId(currNode.getNodeId()), 0)
-            viz.displayImage(1)
+            #    viz.markPoint(self.env.getPointFromId(currNode.getNodeId()), 0)
+            #    viz.displayImage(1)
 
             children, edgeCosts = \
-            self.env.getChildrenWithIslandsAndCosts(currNode)
+            self.env.getChildrenAndCosts(currNode)
             for child, edgeCost in zip(children, edgeCosts):
-                if child in closed:
+                if child.getNodeId() in closed:
                     continue
 
                 if child.getH() == float("inf"):
                     child.setH(self.env.heuristic(child, goalNode))
 
-                #print(currNode.getH())
                 updated = self.updateG(child, currNode.getG() + edgeCost)
                 if updated:
                     child.setParent(currNode)
@@ -53,6 +56,11 @@ class Astar(object):
                     openQ.put((child.getG() + 2*child.getH(), child))
 
         print("Nodes expaneded", len(closed))
+
+        closedNodeIds = list(closed.keys())
+        points = map(self.env.getPointFromId, closedNodeIds)
+        viz.markPoints(points, 90)
+        viz.displayImage(1)
         if currNode.getNodeId() == self.goalNode.getNodeId():
             return 1
         else:

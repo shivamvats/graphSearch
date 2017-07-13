@@ -31,10 +31,10 @@ def main():
     follows (r, c) convention everywhere. Hence, be careful whenever using a
     point with opencv."""
     occGrid = OccupancyGrid()
-    occMap = occGrid.getMapFromImage("../data/testMapSmall.png")
+    occMap = occGrid.getMapFromImage("../data/testMap.png")
     print(occMap.shape)
 
-    useIslands = 1
+    useIslands = 0
 
     if not useIslands:
         gridEnv = GridEnvironment(occMap, occMap.shape[0], occMap.shape[1])
@@ -62,11 +62,9 @@ def main():
             viz.drawCircle(gridEnv.getPointFromId(island.getNodeId()), 80)
             viz.displayImage(1)
         cv.destroyAllWindows()
-        
+
     #"""
-
     ###
-
 
     #startPoint = (100, 20)
     #goalPoint = (201, 200)
@@ -88,6 +86,7 @@ def main():
     else:
         planner = Astar(gridEnv)
     planFound = planner.plan(startNode, goalNode, viz=viz)
+    #planFound = planner.plan(startNode, goalNode)
 
     path = []
     if planFound:
@@ -105,11 +104,6 @@ def main():
     viz.displayImage()
     viz.joinPointsInOrder(pathPoints, thickness=5)
     #viz.displayImage()
-
-
-
-
-
 
 main()
 
