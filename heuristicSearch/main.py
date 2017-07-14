@@ -3,6 +3,7 @@ from env import GridEnvironment, IslandGridEnvironment
 from node import Node
 from occupancyGrid import OccupancyGrid
 from visualizer import ImageVisualizer
+import matplotlib.pyplot as plt
 
 import cv2 as cv
 
@@ -25,6 +26,27 @@ def pointToRC(point):
     pointAsRC = (point[1], point[0])
     return pointAsRC
 
+def plotStuff(planHValues, planTimePerState, stateHValues, planNodeIds=None,
+        stateNodeIds=None):
+    plt.figure(1)
+    plt.subplot(311)
+    if planNodeIds is None:
+        plt.plot(planHValues)
+    else:
+        plt.plot(planNodeIds, planHValues)
+
+    plt.subplot(312)
+    if planNodeIds is None:
+        plt.plot(planTimePerState)
+    else:
+        plt.plot(planNodeIds, planTimePerState)
+
+    plt.subplot(313)
+    if stateNodeIds is None:
+        plt.plot(stateHValues)
+    else:
+        plt.plot(stateNodeIds, stateHValues)
+    plt.show()
 
 def main():
     """Numpy array is accessed as (r, c) while a point is (x, y). The code
@@ -95,6 +117,33 @@ def main():
         while(currNode != startNode):
             path.append(currNode)
             currNode = currNode.getParent()
+        # Reverse the list.
+        path = path[::-1]
+
+        planStateIds = map(lambda node : node.getNodeId(), path)
+        planStats = planner.getPlanStats()
+
+        stateNodeIds = planStats.keys()
+        stateHValues = []
+        for i in planStats.values():
+            stateHValues.append(i[1])
+
+        planHValues, planTimeStamps, planTimePerState = [], [], []
+
+        planNodeIds = []
+        for stateId in planStateIds:
+            planNodeIds.append(stateId)
+            planHValues.append(planStats[stateId][1])
+            planTimeStamps.append(planStats[stateId][0])
+
+        # Start state.
+        planTimePerState = [0]
+        for i in range(1, len(planTimeStamps)):
+            planTimePerState.append(planTimeStamps[i] - planTimeStamps[i-1])
+
+       # plotStuff(planHValues, planTimePerState, stateHValues, planNodeIds,
+       #           stateNodeIds)
+        plotStuff(planHValues, planTimePerState, stateHValues)
 
     pathPoints = []
     for node in path:
@@ -103,7 +152,7 @@ def main():
 
     viz.displayImage()
     viz.joinPointsInOrder(pathPoints, thickness=5)
-    #viz.displayImage()
+    viz.displayImage()
 
 main()
 

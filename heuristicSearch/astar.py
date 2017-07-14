@@ -1,10 +1,12 @@
 import Queue as Q
 import time
-from functools import partial
+import timeit
+import collections
 
 class Astar(object):
-    def __init__(self, env):
+    def __init__(self, env):#, fileName):
         self.env = env
+        #self.fileName = fileName
 
     def updateG(self, node, newG):
         if(node.getG() > newG):
@@ -13,10 +15,20 @@ class Astar(object):
         else:
             return 0
 
+    def getPlanStats(self):
+        return self.stateTimeStamps
+
+    #def saveStatsToFile(self):
+    #    with open(self.fileName, 'w') as f:
+
+
     #@profile
     def plan(self, startNode, goalNode, viz=None):
         self.startNode = startNode
         self.goalNode = goalNode
+
+        # Ordered List of expanded sates and their timestamps.
+        stateTimeStamps = collections.OrderedDict()
 
         self.startNode.setG(0)
         heuristicCost = self.env.heuristic(startNode, goalNode)
@@ -29,12 +41,13 @@ class Astar(object):
         openQ.put((startNode.getH() + startNode.getG(), startNode))
 
         currNode = startNode
-        t = 0
+        startTime = timeit.default_timer()
         while(not openQ.empty() and currNode != self.goalNode):
             priority, currNode = openQ.get()
             nodeId = currNode.getNodeId()
             if nodeId in closed:
                 continue
+            stateTimeStamps[nodeId] = (timeit.default_timer(), currNode.getH())
             closed[nodeId] = 1
 
             #    viz.markPoint(self.env.getPointFromId(currNode.getNodeId()), 0)
@@ -53,8 +66,14 @@ class Astar(object):
                 if updated:
                     child.setParent(currNode)
                     #XXX What if this node is already in the open list?
-                    openQ.put((child.getG() + 2*child.getH(), child))
+                    openQ.put((child.getG() + 5*child.getH(), child))
 
+        self.stateTimeStamps = stateTimeStamps
+
+        endTime = timeit.default_timer()
+        timeTaken = endTime - startTime
+        print("Total time taken for planning is %f", timeTaken)
+        #print(self.stateTimeStamps)
         print("Nodes expaneded", len(closed))
 
         closedNodeIds = list(closed.keys())
