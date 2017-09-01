@@ -2,12 +2,15 @@
 class Node():
     """Base class representing an abstract Node. It contains the bare minimum
     information required for heuristic search."""
-    def __init__(self, nodeId):
+    def __init__(self, nodeId, viaIsland=False):
         self.g = float("inf")
         self.h = float("inf")
         self.nodeId = nodeId
 
-        self.hasDummyG = False
+        # Island search stuff
+        self.h1 = 0
+        self.viaIsland = viaIsland
+        #self.hasDummyG = False
 
     def setG(self, newG):
         self.g = newG
@@ -20,6 +23,21 @@ class Node():
 
     def getG(self):
         return self.g
+
+    def getH1(self):
+        return self.h1
+
+    def setH1(self, val):
+        self.h1 = val
+
+    def getGvalue(self):
+        return self.g + self.h1
+
+    def setViaIsland(self, viaIsland):
+        self.viaIsland = viaIsland
+
+    def isViaIsland(self):
+        return self.viaIsland
 
     def getH(self):
         return self.h
@@ -46,11 +64,21 @@ class SkipEdgesNode(Node):
         else:
             self.hasDummyG = False
 
-class IslandNode(Node):
+class NIslandNode(Node):
     def __init__(self, nodeId, viaIsland=False):
         super(IslandNode, self).__init__(nodeId)
 
+        self.h1 = 0
         self.viaIsland = viaIsland
+
+    def getH1(self):
+        return self.h1
+
+    def setH1(self, val):
+        self.h1 = val
+
+    def getGvalue(self):
+        return self.g + self.h1
 
     def setViaIsland(self, viaIsland):
         self.viaIsland = viaIsland
