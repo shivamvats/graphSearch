@@ -6,16 +6,21 @@ class NIslandGridEnvironment(GridEnvironment):
     def __init__(self, envMap, rows, cols, islandPoints):
         super(NIslandGridEnvironment, self).__init__(envMap, rows, cols)
         self.setIslandNodes(islandPoints)
+        self.inactiveIslandNodeIds = []
 
     def setIslandNodes(self, islandPoints):
         self.islandNodeIds = []
+        # Dummy edge added.
         self.activeIslandNodes = []
+        # Island nodes used yet.
+        self.inactiveIslandNodes = []
 
         for point in islandPoints:
-           islandId = self.getIdFromPoint(point)
-           self.islandNodeIds.append(islandId)
-           if not self.graph.has_key(islandId):
-               self.graph[islandId] = Node(islandId)
+            islandId = self.getIdFromPoint(point)
+            self.islandNodeIds.append(islandId)
+            if not self.graph.has_key(islandId):
+                self.graph[islandId] = Node(islandId)
+            self.inactiveIslandNodes.append( self.graph[islandId] )
 
     def setIslandThresh(self, thresh):
         self.islandThresh = thresh
@@ -29,6 +34,9 @@ class NIslandGridEnvironment(GridEnvironment):
     def activateIslandNode(self, node):
         if node not in self.activeIslandNodes:
             self.activeIslandNodes.append(node)
+        self.inactiveIslandNodeIds
+        self.inactiveIslandNodes.remove( node )
+        self.inactiveIslandNodeIds.remove( node.getNodeId() )
 
     def getIslandThresh(self):
         return self.islandThresh
@@ -43,12 +51,22 @@ class NIslandGridEnvironment(GridEnvironment):
         # in the Refinement stage. Hence, this should use node.h instead of the
         # heuristic function.
         if island:
-            return self.heuristic(node, island) + self.heuristic(island, self.goal)
+            #return self.heuristic(node, island) + self.heuristic(island, self.goal)
+            return self.heuristic( node, island ) + ( self.gValue( self.goal )
+                                                    - self.gValue( island ) )
         else:
-            return self.heuristic(node, self.goal)
+            return self.heuristic( node, self.goal )
 
     def fValue(self, node, island=None):
-        return self.gValue(node) + 2*self.hValue(node, island)
+        return self.gValue( node ) + 10*self.hValue( node, island )
+
+    def _inactiveIslandNodeIds(self):
+        if self.inactiveIslandNodeIds:
+            return self.inactiveIslandNodeIds
+        else:
+            self.inactiveIslandNodeIds = map( lambda n: n.getNodeId(),
+                self.inactiveIslandNodes )
+            return self.inactiveIslandNodeIds
 
     def getChildrenIslandsAndCosts(self, node):
         if(not self.graph.has_key(node.getNodeId())):
@@ -56,31 +74,54 @@ class NIslandGridEnvironment(GridEnvironment):
         point = self.getPointFromId(node.getNodeId())
 
         children, edgeCosts = self.getNeighbours(point[0], point[1])
-        childrenNodes, dummyChildrenNodes, dummyEdgeCosts = [], [], []
-        for child in children:
-            nodeId = self.getIdFromPoint(child)
+        childrenNodes, prunedEdgeCosts, dummyChildrenNodes, dummyEdgeCosts = [], [], [], []
 
-            if(self.graph.has_key(nodeId)):
-                childNode = self.graph[nodeId]
-                childrenNodes.append(childNode)
 
-            else:
-                childNode = Node(nodeId)
-                self.graph[nodeId] = childNode
-                childrenNodes.append(childNode)
-
-        inactiveIslandNodeIds = set(self.islandNodeIds) - set( map(lambda x:
-            x.getNodeId(), self.activeIslandNodes) )
-        print (inactiveIslandNodeIds)
-
-        for nodeId in inactiveIslandNodeIds:
-            if (self.distanceBetweenNodes(node.getNodeId(), nodeId) <
+        # XXX Need to activate the island before I check the other children. In
+        # case there is a dummy edge, we want to prune the children inside the
+        # activation region.
+        for nodeId in self._inactiveIslandNodeIds():
+            if (self.distanceBetweenNodes(node.getNodeId(), nodeId) <=
             self.islandThresh):
                 childIslandNode = self.graph[nodeId]
                 cost = self.heuristic(node, childIslandNode)
                 dummyChildrenNodes.append(childIslandNode)
                 dummyEdgeCosts.append(cost)
-                self.activateIslandNode( Node( nodeId ) )
+                # XXX This is fishy!!!
+                #childIslandNode.setH1( childIslandNode.getH1() + cost )
+                self.activateIslandNode( childIslandNode )
                 print(cost)
 
-        return (childrenNodes, dummyChildrenNodes, edgeCosts, dummyEdgeCosts)
+        for child, cost in zip(children, edgeCosts):
+            nodeId = self.getIdFromPoint(child)
+            if(self.graph.has_key(nodeId)):
+                childNode = self.graph[nodeId]
+
+            else:
+                childNode = Node(nodeId)
+                self.graph[nodeId] = childNode
+
+            flag = 0
+            for island in self.activeIslandNodes:
+                if  ( (self.distanceBetweenNodes( nodeId,
+                    island.getNodeId() ) <= self.islandThresh) and
+                    node.getH1() < island.getH1() ):
+                    flag = 1
+                    break
+            if flag:
+                continue
+
+            childrenNodes.append(childNode)
+            prunedEdgeCosts.append(cost)
+        #print (inactiveIslandNodeIds)
+
+
+        return (childrenNodes, dummyChildrenNodes, prunedEdgeCosts, dummyEdgeCosts)
+
+    def retrievePath( self, start , goal ):
+        path = []
+        currNode = goal
+        while(currNode != start):
+            path.append( currNode )
+            currNode = currNode.getParent()
+        return path[::-1]

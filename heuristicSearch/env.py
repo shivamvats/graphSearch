@@ -20,11 +20,14 @@ class GridEnvironment(Environment):
         else:
             return self.goal
 
-    def distanceBetweenNodes(self, start, end):
-        """Calculates Euclidean distance between two nodes"""
+    def squaredDistanceBetween( self, start, end ):
         startPoint, endPoint = map(self.getPointFromId, [start, end])
         return ((startPoint[0] - endPoint[0])**2 + (startPoint[1] -
-            endPoint[1])**2)**.5
+            endPoint[1])**2)
+
+    def distanceBetweenNodes(self, start, end):
+        """Calculates Euclidean distance between two nodes"""
+        return self.squaredDistanceBetween( start, end )**.5
 
     def isValidPoint(self, point):
         if self.envMap[point[0], point[1]] < 50:

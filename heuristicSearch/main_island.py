@@ -4,74 +4,38 @@ from node import Node
 from occupancyGrid import OccupancyGrid
 from visualizer import ImageVisualizer
 import matplotlib.pyplot as plt
-
 import cv2 as cv
+import pickle
 
-
-clickedR, clickedC = -1, -1
-def inputClickedPoint(image):
-    def clickCallback(event, x, y, flags, param):
-        global clickedR, clickedC
-        if event == cv.EVENT_LBUTTONDOWN:
-            clickedC, clickedR = (x, y)
-
-    cv.namedWindow("image")
-    cv.setMouseCallback("image", clickCallback)
-    cv.imshow("image", image)
-    cv.waitKey(0)
-    cv.destroyAllWindows()
-    return (clickedR, clickedC)
-
-def pointToRC(point):
-    pointAsRC = (point[1], point[0])
-    return pointAsRC
-
-def plotStuff(planHValues, planTimePerState, stateHValues, planNodeIds=None,
-        stateNodeIds=None):
-    plt.figure(1)
-    plt.subplot(311)
-    if planNodeIds is None:
-        plt.plot(planHValues)
-    else:
-        plt.plot(planNodeIds, planHValues)
-
-    plt.subplot(312)
-    if planNodeIds is None:
-        plt.plot(planTimePerState)
-    else:
-        plt.plot(planNodeIds, planTimePerState)
-
-    plt.subplot(313)
-    if stateNodeIds is None:
-        plt.plot(stateHValues)
-    else:
-        plt.plot(stateNodeIds, stateHValues)
-    plt.show()
+from utils import *
 
 def main():
     """Numpy array is accessed as (r, c) while a point is (x, y). The code
     follows (r, c) convention everywhere. Hence, be careful whenever using a
     point with opencv."""
     occGrid = OccupancyGrid()
-    occMap = occGrid.getMapFromImage("../data/testMap.png")
+    occMap = occGrid.getMapFromImage("../data/complex_maze.png")
     print(occMap.shape)
 
     viz = ImageVisualizer(occMap)
 
     #islands = [(140, 100),]
-    islands = []
-    numIslands = 1
-    for i in range(numIslands):
-        print("Click on an island")
-        island = inputClickedPoint(occMap)
-        islands.append(island)
+    #islands = []
+    #numIslands = 4
+    #for i in range(numIslands):
+    #    print("Click on an island")
+    #    island = inputClickedPoint(occMap)
+    #    islands.append(island)
+    #islands = pickle.load( open( "islands_4.pkl", "rb" ) )
+    islands = pickle.load( open( "islands_6.pkl", "rb" ) )
+    startPoint, goalPoint = pickle.load( open( "start_goal.pkl", "rb") )
 
     #startPoint = (100, 20)
     #goalPoint = (201, 200)
-    print("Click start point")
-    startPoint = inputClickedPoint(occMap)
-    print("Click end point")
-    goalPoint = inputClickedPoint(occMap)
+    #print("Click start point")
+    #startPoint = inputClickedPoint(occMap)
+    #print("Click end point")
+    #goalPoint = inputClickedPoint(occMap)
     print(startPoint, goalPoint)
 
     # Environment initialization
@@ -85,15 +49,16 @@ def main():
     goalNode = Node(gridEnv.getIdFromPoint(goalPoint))
     gridEnv.addNode(goalNode)
     gridEnv.goal(goalNode)
-    gridEnv.setHeuristic(1)
-    gridEnv.setIslandThresh(80)
+    gridEnv.setHeuristic(0)
+    gridEnv.setIslandThresh(70)
 
     assert(gridEnv.isValidPoint(startPoint))
     assert(gridEnv.isValidPoint(goalPoint))
 
     # Island visualization.
     for island in gridEnv.getIslandNodes():
-        viz.drawCircle(gridEnv.getPointFromId(island.getNodeId()), 80)
+        viz.drawCircle(gridEnv.getPointFromId(island.getNodeId()),
+                gridEnv.islandThresh)
         viz.displayImage(1)
     cv.destroyAllWindows()
 
@@ -115,14 +80,18 @@ def main():
 
         planStateIds = map(lambda node : node.getNodeId(), path)
 
-    pathPoints = []
-    for node in path:
-        #print(node.getNodeId())
-        pathPoints.append(gridEnv.getPointFromId(node.getNodeId()))
+        pathPoints = []
+        for node in path:
+            #print(node.getNodeId())
+            pathPoints.append(gridEnv.getPointFromId(node.getNodeId()))
 
-    viz.displayImage()
-    viz.joinPointsInOrder(pathPoints, thickness=5)
-    viz.displayImage()
+        viz.displayImage()
+        print( len( pathPoints ) )
+        viz.joinPointsInOrder(pathPoints, thickness=5)
+        viz.displayImage()
+        cv.waitKey(0)
+
+    #cv.imwrite(  )
 
 main()
 

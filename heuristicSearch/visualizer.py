@@ -15,7 +15,7 @@ class ImageVisualizer(Visualizer):
     def drawLine(self, start, end, thickness=5, color=0):
         # Point follows convention (x, y) while the image matrix (numpy) follows
         # (r, c).
-        self.plottedImage = cv.line(self.plottedImage, (start[1], start[0]), (end[1], end[0]), (100, 100, 100), thickness)
+        cv.line(self.plottedImage, (start[1], start[0]), (end[1], end[0]), (100, 100, 100), thickness)
 
     def joinPointsInOrder(self, points, thickness=5, color=0):
         start = points[0]
@@ -36,9 +36,10 @@ class ImageVisualizer(Visualizer):
         print(points[:,0])
         self.plottedImage[points[:,0], points[:,1]] = color
 
-    def drawCircle(self, center, radius):
+    def drawCircle(self, center, radius, thickness=1):
         #self.plottedImage = cv.circle(self.plottedImage, (center[1], center[0]), radius, (50, 50, 50))
-        cv.circle(self.plottedImage, (center[1], center[0]), radius, (50, 50, 50))
+        cv.circle(self.plottedImage, (center[1], center[0]), radius, (50, 50,
+            50), thickness)
 
     def displayImage(self, waitTime=0):
         cv.imshow("Image", self.plottedImage)

@@ -1,9 +1,10 @@
-from astar import Astar, IslandAstar
-from env import GridEnvironment, IslandGridEnvironment
+from astar import Astar
+from env import GridEnvironment
 from node import Node
 from occupancyGrid import OccupancyGrid
 from visualizer import ImageVisualizer
 import matplotlib.pyplot as plt
+import pickle
 
 import cv2 as cv
 
@@ -53,7 +54,7 @@ def main():
     follows (r, c) convention everywhere. Hence, be careful whenever using a
     point with opencv."""
     occGrid = OccupancyGrid()
-    occMap = occGrid.getMapFromImage("../data/testMap.png")
+    occMap = occGrid.getMapFromImage("../data/simple_maze.png")
     print(occMap.shape)
 
     useIslands = 0
@@ -63,6 +64,8 @@ def main():
         gridEnv.setHeuristic(0)
 
     viz = ImageVisualizer(occMap)
+    islands = pickle.load( open( "islands_4.pkl", "rb" ) )
+    startPoint, goalPoint = pickle.load( open( "start_goal.pkl", "rb") )
 
     ###
     # Island related stuff
@@ -91,9 +94,10 @@ def main():
     #startPoint = (100, 20)
     #goalPoint = (201, 200)
     print("Click start point")
-    startPoint = inputClickedPoint(occMap)
+    #startPoint = inputClickedPoint(occMap)
     print("Click end point")
-    goalPoint = inputClickedPoint(occMap)
+    #goalPoint = inputClickedPoint(occMap)
+    startPoint, goalPoint = pickle.load( open( "start_goal.pkl", "rb") )
     print(startPoint, goalPoint)
     assert(gridEnv.isValidPoint(startPoint))
     assert(gridEnv.isValidPoint(goalPoint))
