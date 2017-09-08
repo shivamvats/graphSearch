@@ -23,7 +23,7 @@ def inputSavePoints():
     fileName = sys.argv[2]
 
     occGrid = OccupancyGrid()
-    occMap = occGrid.getMapFromImage("../data/complex_maze.png")
+    occMap = occGrid.getMapFromImage("../data/simple_maze.png")
 
     points = inputPoints( numPoints, occMap )
     savePoints( points, fileName )

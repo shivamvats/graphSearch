@@ -86,7 +86,6 @@ def main():
             pathPoints.append(gridEnv.getPointFromId(node.getNodeId()))
 
         viz.displayImage()
-        print( len( pathPoints ) )
         viz.joinPointsInOrder(pathPoints, thickness=5)
         viz.displayImage()
         cv.waitKey(0)

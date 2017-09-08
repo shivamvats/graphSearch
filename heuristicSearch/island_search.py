@@ -116,6 +116,7 @@ class DummyEdgeAstar(Astar):
         if dummySuccs:
             # If there is an dummy edge, do not expand any other neighbours.
             succs, edgeCosts = [], []
+            #self.OPEN = Q.PriorityQueue()
 
         def _insertInOpen( node, succ, island ):
             succ.setParent( node )
@@ -200,8 +201,6 @@ class DummyEdgeAstar(Astar):
         # DUMMY Planning Stage.
         currNode = startNode
         while(not self.OPEN.empty()):
-            if self.i % 500 == 0:
-                print( self.OPEN.qsize() )
             priority, currNode = self.OPEN.get()
             #print( "Expanded fvalue: %f", self.env.fValue(currNode) )
             if self.env.gValue(goalNode) <= self.env.fValue(currNode):
@@ -252,6 +251,7 @@ class DummyEdgeAstar(Astar):
                 raise ValueError( "The dummy edge nodes are fishy.")
             return (dummyStart, dummyGoal)
 
+        self.EXPANDED_NODES = len( self.CLOSED )
         self.CLOSED.clear()
         self.OPEN = Q.PriorityQueue()
         dummyStart, dummyGoal = _findDummyEdge( path )
@@ -290,5 +290,7 @@ class DummyEdgeAstar(Astar):
             #dummyGoal = None
             dummyStart, dummyGoal = _findDummyEdge( path )
 
+        self.EXPANDED_NODES += len( self.CLOSED )
+        print( "Number of expanded nodes ", self.EXPANDED_NODES )
         print("Plan found")
         return 1
