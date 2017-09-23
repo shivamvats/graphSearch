@@ -6,6 +6,8 @@ from visualizer import ImageVisualizer
 import matplotlib.pyplot as plt
 
 import cv2 as cv
+import sys
+import pickle
 
 
 clickedR, clickedC = -1, -1
@@ -51,9 +53,19 @@ def plotStuff(planHValues, planTimePerState, stateHValues, planNodeIds=None,
 def main():
     """Numpy array is accessed as (r, c) while a point is (x, y). The code
     follows (r, c) convention everywhere. Hence, be careful whenever using a
-    point with opencv."""
+    point with opencv.
+
+    Takes one command line argument: Folder that has the environment and
+    config.
+    """
+
+    folder = sys.argv[1]
+    image = folder + "/image.png"
+    start_goal = folder + "/start_goal.pkl"
+    startPoint, goalPoint = pickle.load( open(start_goal, "rb") )
+
     occGrid = OccupancyGrid()
-    occMap = occGrid.getMapFromImage("../data/testMap.png")
+    occMap = occGrid.getMapFromImage(image)
     print(occMap.shape)
 
     useIslands = 0
@@ -64,36 +76,12 @@ def main():
 
     viz = ImageVisualizer(occMap)
 
-    ###
-    # Island related stuff
-    ###
-    #"""
-    if useIslands:
-        #islands = [(140, 100),]
-        islands = []
-        numIslands = 1
-        for i in range(numIslands):
-            print("Click on an island")
-            island = inputClickedPoint(occMap)
-            islands.append(island)
-        gridEnv = IslandGridEnvironment(occMap, occMap.shape[0], occMap.shape[1],
-                islands)
-        gridEnv.setHeuristic(1)
-        gridEnv.setIslandThresh(80)
-        for island in gridEnv.getIslandNodes():
-            viz.drawCircle(gridEnv.getPointFromId(island.getNodeId()), 80)
-            viz.displayImage(1)
-        cv.destroyAllWindows()
-
-    #"""
-    ###
-
     #startPoint = (100, 20)
     #goalPoint = (201, 200)
-    print("Click start point")
-    startPoint = inputClickedPoint(occMap)
-    print("Click end point")
-    goalPoint = inputClickedPoint(occMap)
+    #print("Click start point")
+    #startPoint = inputClickedPoint(occMap)
+    #print("Click end point")
+    #goalPoint = inputClickedPoint(occMap)
     print(startPoint, goalPoint)
     assert(gridEnv.isValidPoint(startPoint))
     assert(gridEnv.isValidPoint(goalPoint))
@@ -103,16 +91,14 @@ def main():
     goalNode = Node(gridEnv.getIdFromPoint(goalPoint))
     gridEnv.addNode(goalNode)
 
-    if useIslands:
-        planner = IslandAstar(gridEnv)
-    else:
-        planner = Astar(gridEnv)
+    planner = Astar(gridEnv)
     planFound = planner.plan(startNode, goalNode, viz=viz)
     #planFound = planner.plan(startNode, goalNode)
 
     path = []
     if planFound:
         print("Planning successful")
+        # Retrieve the path.
         currNode = goalNode
         while(currNode != startNode):
             path.append(currNode)
@@ -123,6 +109,9 @@ def main():
         planStateIds = map(lambda node : node.getNodeId(), path)
         planStats = planner.getPlanStats()
 
+        # -----------------------------------
+        # Finding the local minima.
+        # Get the timestamps.
         stateNodeIds = planStats.keys()
         stateHValues = []
         for i in planStats.values():

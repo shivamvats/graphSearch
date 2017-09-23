@@ -15,7 +15,7 @@ class ImageVisualizer(Visualizer):
     def drawLine(self, start, end, thickness=5, color=0):
         # Point follows convention (x, y) while the image matrix (numpy) follows
         # (r, c).
-        self.plottedImage = cv.line(self.plottedImage, (start[1], start[0]), (end[1], end[0]), (100, 100, 100), thickness)
+        cv.line(self.plottedImage, (start[1], start[0]), (end[1], end[0]), (100, 100, 100), thickness)
 
     def joinPointsInOrder(self, points, thickness=5, color=0):
         start = points[0]

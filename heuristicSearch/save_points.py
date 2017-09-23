@@ -17,13 +17,15 @@ def savePoints(points, fileName):
 
 def inputSavePoints():
     """Function to input and pickle points.
-    Takes two commands line arguments: number of points and file to save them
-    in."""
-    numPoints = int( sys.argv[1] )
+    Takes three commands line arguments: Map to be used, file to be saved in
+    and number of points.
+    """
+    image = sys.argv[1]
     fileName = sys.argv[2]
+    numPoints = int( sys.argv[3] )
 
     occGrid = OccupancyGrid()
-    occMap = occGrid.getMapFromImage("../data/complex_maze.png")
+    occMap = occGrid.getMapFromImage(image)
 
     points = inputPoints( numPoints, occMap )
     savePoints( points, fileName )
