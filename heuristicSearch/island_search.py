@@ -107,7 +107,7 @@ class DummyEdgeAstar(Astar):
         #if viz is not None:
         self.i += 1
         self.viz.markPoint(self.env.getPointFromId(node.getNodeId()), 0)
-        if self.i%1000 == 0:
+        if self.i%3000 == 0:
             self.viz.displayImage(1)
 
         succs, dummySuccs, edgeCosts, dummyCosts = \
@@ -116,7 +116,7 @@ class DummyEdgeAstar(Astar):
         if dummySuccs:
             # If there is an dummy edge, do not expand any other neighbours.
             succs, edgeCosts = [], []
-            #self.OPEN = Q.PriorityQueue()
+            self.OPEN = Q.PriorityQueue()
 
         def _insertInOpen( node, succ, island ):
             succ.setParent( node )

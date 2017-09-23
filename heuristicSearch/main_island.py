@@ -1,4 +1,5 @@
 from island_search import Astar, IslandAstar, DummyEdgeAstar
+from island_search2 import DummyEdgeAstar2
 from nisland_env import NIslandGridEnvironment
 from node import Node
 from occupancyGrid import OccupancyGrid
@@ -14,7 +15,7 @@ def main():
     follows (r, c) convention everywhere. Hence, be careful whenever using a
     point with opencv."""
     occGrid = OccupancyGrid()
-    occMap = occGrid.getMapFromImage("../data/complex_maze.png")
+    occMap = occGrid.getMapFromImage("../data/simple_maze.png")
     print(occMap.shape)
 
     viz = ImageVisualizer(occMap)
@@ -28,6 +29,7 @@ def main():
     #    islands.append(island)
     #islands = pickle.load( open( "islands_4.pkl", "rb" ) )
     islands = pickle.load( open( "islands_6.pkl", "rb" ) )
+    #islands = pickle.load( open( "islands_1.pkl", "rb" ) )
     startPoint, goalPoint = pickle.load( open( "start_goal.pkl", "rb") )
 
     #startPoint = (100, 20)
@@ -51,6 +53,8 @@ def main():
     gridEnv.goal(goalNode)
     gridEnv.setHeuristic(0)
     gridEnv.setIslandThresh(70)
+    gridEnv.setIslandEpsilon(4)
+    gridEnv.setSearchEpsilon( 2 )
 
     assert(gridEnv.isValidPoint(startPoint))
     assert(gridEnv.isValidPoint(goalPoint))
@@ -64,7 +68,7 @@ def main():
 
     # Planner
     #planner = IslandAstar(gridEnv)
-    planner = DummyEdgeAstar( gridEnv )
+    planner = DummyEdgeAstar2( gridEnv )
     planFound = planner.plan(startNode, goalNode, viz=viz)
     #planFound = planner.plan(startNode, goalNode)
 
@@ -86,7 +90,8 @@ def main():
             pathPoints.append(gridEnv.getPointFromId(node.getNodeId()))
 
         viz.displayImage()
-        viz.joinPointsInOrder(pathPoints, thickness=5)
+        #viz.joinPointsInOrder(pathPoints, thickness=5)
+        viz.markPoints( pathPoints, color=100 )
         viz.displayImage()
         cv.waitKey(0)
 

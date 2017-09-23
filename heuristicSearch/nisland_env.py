@@ -25,6 +25,12 @@ class NIslandGridEnvironment(GridEnvironment):
     def setIslandThresh(self, thresh):
         self.islandThresh = thresh
 
+    def setIslandEpsilon( self, epsilon ):
+        self.islandEpsilon = epsilon
+
+    def setSearchEpsilon( self, epsilon ):
+        self.searchEpsilon = epsilon
+
     def getIslandNodes(self):
         islandNodes = []
         for islandId in self.islandNodeIds:
@@ -44,21 +50,80 @@ class NIslandGridEnvironment(GridEnvironment):
     def gValue(self, node):
         return node.getG() + node.getH1()
 
-    def hValue(self, node, island=None):
+    def hValue1(self, node):
+        """To be used in the Dummy Planning Phase"""
+        # XXX Ideally, the node should remember its h-value so that it can be used
+        # in the Refinement stage. Hence, this should use node.h instead of the
+        # heuristic function.
+        return self.heuristic( node, self.goal )
+        #return node.getH()
+
+    def hValue2(self, node, island=None):
         """Currently island may be just a single node, but this should be extended
         to handle a set of islands."""
         # XXX Ideally, the node should remember its h-value so that it can be used
         # in the Refinement stage. Hence, this should use node.h instead of the
         # heuristic function.
         if island:
+            # XXX Only valid for Refinement stage as goal.gValue = inf in the
+            # first phase.
             #return self.heuristic(node, island) + self.heuristic(island, self.goal)
             return self.heuristic( node, island ) + ( self.gValue( self.goal )
                                                     - self.gValue( island ) )
         else:
+            # Assuming that the g costs are optimal, this difference is an
+            # underestimate.
+            return self.gValue( self.goal ) - self.gValue( node )
+            #return node.getH()
+
+    def hValue3(self, node):
+        """Calculate the heuristic by taking a min over all heuristic costs via
+        the active islands."""
+        hCost = float("inf")
+        for island in self.activeIslandNodes:
+            cost = self.hValue2(node, island)
+            if cost <= self.islandEpsilon*self.hValue1(node) and cost < hCost:
+                hCost = cost
+        return min( hCost, self.hValue1(node) )
+
+    def hValue4(self, node, island):
+        # XXX Ideally, should be using the updated hvalue (or gValue(goal) -
+        # gValue(node)) calculated after dummy planning phase. However, I am
+        # not sure if these are being correctly maintained.
+        #
+        #if self.hValue2(node, island) <= (self.islandEpsilon *
+        #        self.hValue(node) ):
+        #    return self.gValue + self.hValue2(node, island)
+        viaIsland = self.heuristic(node, island) + self.heuristic(island, self.goal) 
+        viaIsland *= self.searchEpsilon
+        if viaIsland <= self.islandEpsilon * self.heuristic(node, self.goal):
+            return viaIsland
+        else:
             return self.heuristic( node, self.goal )
 
-    def fValue(self, node, island=None):
-        return self.gValue( node ) + 10*self.hValue( node, island )
+    def fValue1(self, node):
+        return self.gValue( node ) + self.searchEpsilon*self.hValue1( node )
+
+    def fValue2(self, node, island=None):
+        """Weighted f value"""
+        return self.gValue( node ) + self.searchEpsilon*self.hValue2( node, island )
+
+    def fValue3(self, node):
+        """Return the min fValue via all islands."""
+        return self.gValue( node ) + self.hValue3( node)
+
+    def fValue4(self, node, island):
+        """Via the island if not worse than islandEpsilon times the direct
+            route"""
+        # XXX Ideally, should be using the updated hvalue (or gValue(goal) -
+        # gValue(node)) calculated after dummy planning phase. However, I am
+        # not sure if these are being correctly maintained.
+        #
+        #if self.hValue2(node, island) <= (self.islandEpsilon *
+        #        self.hValue(node) ):
+        #    return self.gValue + self.hValue2(node, island)
+        return self.gValue(node) + self.hValue4(node, island)
+
 
     def _inactiveIslandNodeIds(self):
         if self.inactiveIslandNodeIds:
@@ -121,6 +186,8 @@ class NIslandGridEnvironment(GridEnvironment):
     def retrievePath( self, start , goal ):
         path = []
         currNode = goal
+        print(goal.getNodeId())
+        print(start.getNodeId())
         while(currNode != start):
             path.append( currNode )
             currNode = currNode.getParent()

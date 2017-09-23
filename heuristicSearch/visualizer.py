@@ -12,6 +12,9 @@ class ImageVisualizer(Visualizer):
         self.backgroundImage = backgroundImage
         self.plottedImage = copy.copy(self.backgroundImage)
 
+    def resetImage( self ):
+        self.plottedImage = copy.copy(self.backgroundImage)
+
     def drawLine(self, start, end, thickness=5, color=0):
         # Point follows convention (x, y) while the image matrix (numpy) follows
         # (r, c).
@@ -29,11 +32,9 @@ class ImageVisualizer(Visualizer):
         # Following (r, c) convention.
         self.plottedImage[point[0], point[1]] = color
 
-    def markPoints(self, points, color):
+    def markPoints(self, points, color=0):
         # Following (r, c) convention.
         points = np.array(points)#.flatten()
-        #print(points)
-        print(points[:,0])
         self.plottedImage[points[:,0], points[:,1]] = color
 
     def drawCircle(self, center, radius, thickness=1):
