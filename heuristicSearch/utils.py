@@ -40,3 +40,4 @@ def plotStuff(planHValues, planTimePerState, stateHValues, planNodeIds=None,
     else:
         plt.plot(stateNodeIds, stateHValues)
     plt.show()
+
