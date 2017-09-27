@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="744.09448819"
+   height="1052.3622047"
+   id="svg3008"
+   version="1.1"
+   inkscape:version="0.48.5 r10040"
+   sodipodi:docname="triangle_and_local_min.svg"
+   inkscape:export-filename="/home/aries/Documents/Planning/graphSearch/data/triangle_and_local_min.png"
+   inkscape:export-xdpi="51.313133"
+   inkscape:export-ydpi="51.313133">
+  <defs
+     id="defs3010" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.35"
+     inkscape:cx="-127.85714"
+     inkscape:cy="634.28571"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1295"
+     inkscape:window-height="744"
+     inkscape:window-x="65"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata3013">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       style="fill:none;stroke:#000000;stroke-width:10;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 214.28571,529.50505 0,111.42857 260,0 0,-114.28572"
+       id="path3016"
+       inkscape:connector-curvature="0" />
+    <g
+       id="layer1-5"
+       inkscape:label="Layer 1"
+       transform="translate(-32.20792,-33.531083)">
+      <path
+         inkscape:connector-curvature="0"
+         id="path2987"
+         d="m 302.50868,460.9562 -90.82713,-110.59401 149.25256,-0.74 c 82.0889,-0.40701 149.75412,-0.23845 150.36712,0.37457 0.83332,0.8333 -114.4568,217.804 -117.40957,220.95944 -0.30572,0.3267 -41.42806,-49.1733 -91.38298,-110 l 0,0 z"
+         style="fill:#000000;stroke:none" />
+    </g>
+  </g>
+</svg>

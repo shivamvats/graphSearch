@@ -41,17 +41,17 @@ class Astar(object):
         openQ.put((startNode.getH() + startNode.getG(), startNode))
 
         currNode = startNode
-        startTime = timeit.default_timer()
+        startTime = time.time()
         while(not openQ.empty() and currNode != self.goalNode):
             priority, currNode = openQ.get()
             nodeId = currNode.getNodeId()
             if nodeId in closed:
                 continue
-            stateTimeStamps[nodeId] = (timeit.default_timer(), currNode.getH())
+            stateTimeStamps[nodeId] = (time.time(), currNode.getH())
             closed[nodeId] = 1
 
-            #    viz.markPoint(self.env.getPointFromId(currNode.getNodeId()), 0)
-            #    viz.displayImage(1)
+            #viz.markPoint(self.env.getPointFromId(currNode.getNodeId()), 0)
+            #viz.displayImage(1)
 
             children, edgeCosts = \
             self.env.getChildrenAndCosts(currNode)
@@ -66,11 +66,11 @@ class Astar(object):
                 if updated:
                     child.setParent(currNode)
                     #XXX What if this node is already in the open list?
-                    openQ.put((child.getG() + 5*child.getH(), child))
+                    openQ.put((child.getG() + 10*child.getH(), child))
 
         self.stateTimeStamps = stateTimeStamps
 
-        endTime = timeit.default_timer()
+        endTime = time.time()
         timeTaken = endTime - startTime
         print("Total time taken for planning is %f", timeTaken)
         #print(self.stateTimeStamps)

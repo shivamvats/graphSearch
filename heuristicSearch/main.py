@@ -4,51 +4,12 @@ from node import Node
 from occupancyGrid import OccupancyGrid
 from visualizer import ImageVisualizer
 import matplotlib.pyplot as plt
+from utils import *
+
 
 import cv2 as cv
 import sys
 import pickle
-
-
-clickedR, clickedC = -1, -1
-def inputClickedPoint(image):
-    def clickCallback(event, x, y, flags, param):
-        global clickedR, clickedC
-        if event == cv.EVENT_LBUTTONDOWN:
-            clickedC, clickedR = (x, y)
-
-    cv.namedWindow("image")
-    cv.setMouseCallback("image", clickCallback)
-    cv.imshow("image", image)
-    cv.waitKey(0)
-    cv.destroyAllWindows()
-    return (clickedR, clickedC)
-
-def pointToRC(point):
-    pointAsRC = (point[1], point[0])
-    return pointAsRC
-
-def plotStuff(planHValues, planTimePerState, stateHValues, planNodeIds=None,
-        stateNodeIds=None):
-    plt.figure(1)
-    plt.subplot(311)
-    if planNodeIds is None:
-        plt.plot(planHValues)
-    else:
-        plt.plot(planNodeIds, planHValues)
-
-    plt.subplot(312)
-    if planNodeIds is None:
-        plt.plot(planTimePerState)
-    else:
-        plt.plot(planNodeIds, planTimePerState)
-
-    plt.subplot(313)
-    if stateNodeIds is None:
-        plt.plot(stateHValues)
-    else:
-        plt.plot(stateNodeIds, stateHValues)
-    plt.show()
 
 def main():
     """Numpy array is accessed as (r, c) while a point is (x, y). The code
@@ -64,15 +25,13 @@ def main():
     start_goal = folder + "/start_goal.pkl"
     startPoint, goalPoint = pickle.load( open(start_goal, "rb") )
 
+
     occGrid = OccupancyGrid()
     occMap = occGrid.getMapFromImage(image)
     print(occMap.shape)
 
-    useIslands = 0
-
-    if not useIslands:
-        gridEnv = GridEnvironment(occMap, occMap.shape[0], occMap.shape[1])
-        gridEnv.setHeuristic(0)
+    gridEnv = GridEnvironment(occMap, occMap.shape[0], occMap.shape[1])
+    gridEnv.setHeuristic(0)
 
     viz = ImageVisualizer(occMap)
 
@@ -130,8 +89,8 @@ def main():
         for i in range(1, len(planTimeStamps)):
             planTimePerState.append(planTimeStamps[i] - planTimeStamps[i-1])
 
-       # plotStuff(planHValues, planTimePerState, stateHValues, planNodeIds,
-       #           stateNodeIds)
+        #plotStuff(planHValues, planTimePerState, stateHValues, planNodeIds,
+                  #stateNodeIds)
         plotStuff(planHValues, planTimePerState, stateHValues)
 
     pathPoints = []
