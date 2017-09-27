@@ -37,10 +37,10 @@ class ImageVisualizer(Visualizer):
         points = np.array(points)#.flatten()
         self.plottedImage[points[:,0], points[:,1]] = color
 
-    def drawCircle(self, center, radius, thickness=1):
+    def drawCircle(self, center, radius, color=(50,50,50), thickness=1):
         #self.plottedImage = cv.circle(self.plottedImage, (center[1], center[0]), radius, (50, 50, 50))
-        cv.circle(self.plottedImage, (center[1], center[0]), radius, (50, 50,
-            50), thickness)
+        cv.circle(self.plottedImage, (center[1], center[0]), radius,
+                color=color, thickness=thickness)
 
     def displayImage(self, waitTime=0):
         cv.imshow("Image", self.plottedImage)
