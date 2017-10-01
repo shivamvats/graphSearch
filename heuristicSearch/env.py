@@ -121,64 +121,68 @@ class IslandGridEnvironment(GridEnvironment):
         super(IslandGridEnvironment, self).__init__(envMap, rows, cols)
         self.setIslandNodes(islandPoints)
 
-    def setIslandNodes(self, islandPoints):
-        self.islandNodeIds = []
-        self.activatedIslandNodes = []
+    def setIslandClusters(self, islandPointClusters):
+        self.islandClusters= []
 
-        for point in islandPoints:
-           islandId = self.getIdFromPoint(point) 
-           self.islandNodeIds.append(islandId)
-           if not self.graph.has_key(islandId):
-               self.graph[islandId] = Node(islandId)
+        for cluster in islandPointClusters:
+            idCluster = []
+            for point in cluster:
+                idCluster.append( self.getIdFromPoint(point) )
+                if not self.graph.has_key(islandId):
+                    self.graph[islandId] = Node(islandId)
+            self.islandClusters.append( idCluster )
+        # Remove the used clusters from this list.
+        self.availableIslandClusters = self.islandClusters
 
     def setIslandThresh(self, thresh):
         self.islandThresh = thresh
 
-    def getIslandNodes(self):
+    def getIslandClusters(self):
         islandNodes = []
-        for islandId in self.islandNodeIds:
-            islandNodes.append(self.graph[islandId])
+        for cluster in self.islandClusters:
+            for islandId in cluster:
+                islandNodes.append(self.graph[islandId])
         return islandNodes
-
-    def activateIslandNode(self, node):
-        if node not in self.activatedIslandNodes:
-            self.activatedIslandNodes.append(node)
 
     def getIslandThresh(self):
         return self.islandThresh
 
-    def getChildrenWithIslandsAndCosts(self, node):
-        if(not self.graph.has_key(node.getNodeId())):
-            self.graph[node.getNodeId()] = node
-        point = self.getPointFromId(node.getNodeId())
+    def nIslandHeuristic(self, currNode, goalNode):
+        """From the list of available clusters, check if any is within
+        threshold. If so, """
 
-        children, edgeCosts = self.getNeighbours(point[0], point[1])
-        childrenNodes = []
-        for child in children:
-            nodeId = self.getIdFromPoint(child)
+    #def getChildrenWithIslandsAndCosts(self, node):
+    #    if(not self.graph.has_key(node.getNodeId())):
+    #        self.graph[node.getNodeId()] = node
+    #    point = self.getPointFromId(node.getNodeId())
 
-            if(self.graph.has_key(nodeId)):
-                childNode = self.graph[nodeId]
-                childrenNodes.append(childNode)
+    #    children, edgeCosts = self.getNeighbours(point[0], point[1])
+    #    childrenNodes = []
+    #    for child in children:
+    #        nodeId = self.getIdFromPoint(child)
 
-            else:
-                childNode = Node(nodeId)
-                self.graph[nodeId] = childNode
-                childrenNodes.append(childNode)
+    #        if(self.graph.has_key(nodeId)):
+    #            childNode = self.graph[nodeId]
+    #            childrenNodes.append(childNode)
 
-        flag = 0
-        for nodeId in self.islandNodeIds:
-            if (self.distanceBetweenNodes(node.getNodeId(), nodeId) <
-            self.islandThresh):
-                # XXX Assumes that one node is near only one island node.
-                childIslandNode = self.graph[nodeId]
-                cost = self.heuristic(node, childIslandNode)
-                childrenNodes.append(childIslandNode)
-                edgeCosts.append(cost)
-                flag = 1
-                break
-        if node.checkDummyG():
-            for childNode in childrenNodes:
-                childNode.setHasDummyG(True)
+    #        else:
+    #            childNode = Node(nodeId)
+    #            self.graph[nodeId] = childNode
+    #            childrenNodes.append(childNode)
 
-        return (childrenNodes, edgeCosts, flag)
+    #    flag = 0
+    #    for nodeId in self.islandNodeIds:
+    #        if (self.distanceBetweenNodes(node.getNodeId(), nodeId) <
+    #        self.islandThresh):
+    #            # XXX Assumes that one node is near only one island node.
+    #            childIslandNode = self.graph[nodeId]
+    #            cost = self.heuristic(node, childIslandNode)
+    #            childrenNodes.append(childIslandNode)
+    #            edgeCosts.append(cost)
+    #            flag = 1
+    #            break
+    #    if node.checkDummyG():
+    #        for childNode in childrenNodes:
+    #            childNode.setHasDummyG(True)
+
+    #    return (childrenNodes, edgeCosts, flag)

@@ -36,6 +36,7 @@ class PeakFinder:
             forwardDiff = planTimePerState[i+1] - planTimePerState[i]
             # Note: The time per state must be positive, else it it not a peak.
             if planTimePerState[i] > 0 and backwardDiff > 0 and forwardDiff < 0:
+            #if backwardDiff > 0 and forwardDiff < 0:
                 peakNodeIds.append( nodeIds[i] )
                 peakTimePerState.append( planTimePerState[i] )
         # Sort according to time per state.
@@ -180,7 +181,7 @@ class PeakFinder:
             viz.drawCircle(self.gridEnv.getPointFromId(peak), 5, color=(200,200,200), thickness=-1)
         for peak in heuristicPeaks:
             print("Marking the minima")
-            #viz.drawCircle(self.gridEnv.getPointFromId(peak), 5, color=(150,150,150), thickness=-1)
+            viz.drawCircle(self.gridEnv.getPointFromId(peak), 5, color=(150,150,150), thickness=-1)
         #---------------------------------------
         viz.displayImage()
 

@@ -7,6 +7,9 @@ class Node():
         self.h = float("inf")
         self.nodeId = nodeId
 
+        # For the n-island heuristic in local minima algo.
+        self.history = []
+
         self.hasDummyG = False
 
     def setG(self, newG):

@@ -38,6 +38,7 @@ class ImageVisualizer(Visualizer):
 
     def drawCircle(self, center, radius, color=(50,50,50), thickness=1):
         #self.plottedImage = cv.circle(self.plottedImage, (center[1], center[0]), radius, (50, 50, 50))
+        print(center)
         cv.circle(self.plottedImage, (center[1], center[0]), radius,
                 color=color, thickness=thickness)
 

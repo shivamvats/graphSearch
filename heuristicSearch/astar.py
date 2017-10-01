@@ -66,7 +66,7 @@ class Astar(object):
                 if updated:
                     child.setParent(currNode)
                     #XXX What if this node is already in the open list?
-                    openQ.put((child.getG() + 10*child.getH(), child))
+                    openQ.put((child.getG() + 2*child.getH(), child))
 
         self.stateTimeStamps = stateTimeStamps
 
