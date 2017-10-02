@@ -56,6 +56,7 @@ def main():
     gridEnv.ISLANDTHRESH = 50
 
     planner = DynamicMHAstar(gridEnv, 2, 10)
+    planner.DEBUG = 1
     planFound = planner.plan(startNode, goalNode, viz=viz)
     #planFound = planner.plan(startNode, goalNode)
 

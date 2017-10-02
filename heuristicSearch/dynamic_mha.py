@@ -67,13 +67,18 @@ class DynamicMHAstar():
             updated = self.updateG(child, currNode.getG() + edgeCost)
             if updated:
                 child.setParent(currNode)
-                if currNode.history:
+                if currNode.getNodeId() in self.env.islandDict:
+                    child.history = currNode.history + [currNode.getNodeId()]
+                elif currNode.getNodeId() in self.env.exitStates:
+                    child.history = []
+                else:
                     child.history = currNode.history
                 #XXX What if this node is already in the open list?
                 if not child in self.anchorClosed:
                     Q.heappush( self.anchorQ, (child.getG() + self.w1 *
                         self.env.heuristic(child, self.goalNode), child) )
-                    print("inad", self.numInadHeurs)
+                    if self.DEBUG:
+                        print("inad", self.numInadHeurs)
                     if self.numInadHeurs > 0 and not child in self.dynamicClosed:
                         dynamicKey = child.getG() + ( self.w1 *
                                 self.inadHeurs[-1](child,
@@ -88,12 +93,27 @@ class DynamicMHAstar():
 
     def checkIfNearMinimum(self, currNode):
         """Only checks the distance from the first island in the cluster."""
-        for i, cluster in enumerate(self.env.availableClusters):
-            if (self.env.distanceBetweenNodes(currNode.getNodeId(),
-                cluster[0].getNodeId()) <=
-                    self.env.ISLANDTHRESH):
-                return i
+        for i, cluster in enumerate(self.env.islandClusters):
+            if self.env.islandClusterAvailable[i]:
+                if (self.env.distanceBetweenNodes(currNode.getNodeId(),
+                    cluster[0]) <=
+                        self.env.ISLANDTHRESH):
+                    return i
         return -1
+
+    def createNewQueue(self, currNode):
+        index = self.checkIfNearMinimum(currNode)
+        if (index >= 0):
+            # Search inside an activation region.
+            print(index)
+            self.addDynamicHeuristic(
+                    partial(self.env.islandClusterHeuristic, index) )
+            self.env.activeClusterIx = index
+            for island in self.env.islandClusters[index]:
+                    self.viz.drawCircle(self.env.getPointFromId(island),
+                            3, (100, 100, 100), -1)
+            self.env.islandClusterAvailable[index] = 0
+            #self.env.availableClusters.remove(self.env.availableClusters[index])
 
     #@profile
     def plan(self, startNode, goalNode, viz=None):
@@ -123,20 +143,23 @@ class DynamicMHAstar():
                             return 1
                         #print(minKey, self.anchorQ[0][0])
                         priority, currNode = Q.heappop( self.inadQs[i] )
-                        print(priority - currNode.getG(),
-                                self.w1*self.env.heuristic(currNode, self.goalNode))
+                        #print(priority - currNode.getG(),
+                        #        self.w1*self.env.heuristic(currNode, self.goalNode))
                         nodeId = currNode.getNodeId()
                         stateTimeStamps[nodeId] = (time.time(), currNode.getH())
                         self.dynamicClosed[nodeId] = 1
                         self.expand(self.inadQs[i], currNode)
-                        # Check if the currNode is an exit state of the
-                        # cluster.
+                        self.createNewQueue(currNode)
+                        #Check if the currNode is an exit state of the
+                        #cluster.
                         #print("distance", self.env.distanceBetweenNodes(currNode.getNodeId(), self.env.islandClusters[
                         #        self.env.activeClusterIx][-1].getNodeId()))
                         #if self.env.distanceBetweenNodes(currNode.getNodeId(), self.env.islandClusters[
                         #        self.env.activeClusterIx][-1].getNodeId()) < 2:
+                        #if currNode.getNodeId() in self.env.exitStates:
                         #    self.deleteDynamicHeuristic()
                         #    #del self.env.islandClusters[self.env.activeClusterIx]
+                        #    self.env.islandClusterAvailable[self.env.exitStates[currNode.getNodeId()]] = 0
                         #    self.env.activeClusterIx = -1
                     else:
                         ANCHORSEARCH = 1
@@ -149,23 +172,15 @@ class DynamicMHAstar():
                 def _anchorExpansion():
                     if self.goalNode.getG() <= self.anchorQ[0][0]:
                         return 1
-                    print("anchor")
+                    if self.DEBUG:
+                        print("anchor")
                     priority, currNode = Q.heappop( self.anchorQ )
-                    index = self.checkIfNearMinimum(currNode)
-                    if (index >= 0):
-                        # Search inside an activation region.
-                        self.addDynamicHeuristic(
-                                partial(self.env.islandClusterHeuristic, index) )
-                        self.env.activeClusterIx = index
-                        for island in self.env.islandClusters[index]:
-                                self.viz.drawCircle(self.env.getPointFromId(island.getNodeId()),
-                                        3, (100, 100, 100), -1)
-                        self.env.availableClusters.remove(self.env.availableClusters[index])
 
                     nodeId = currNode.getNodeId()
                     stateTimeStamps[nodeId] = (time.time(), currNode.getH())
                     self.anchorClosed[nodeId] = 1
                     self.expand(self.anchorQ, currNode)
+                    self.createNewQueue(currNode)
                     return 0
 
                 if( _anchorExpansion() ):
@@ -177,11 +192,11 @@ class DynamicMHAstar():
         timeTaken = endTime - startTime
         print("Total time taken for planning is %f", timeTaken)
         #print(self.stateTimeStamps)
-        print("Nodes expaneded", len(self.anchorClosed) +
-                len(self.dynamicClosed))
+        print("Nodes expaneded", len(self.anchorClosed)) #+
+                #len(self.dynamicClosed))
 
-        closedNodeIds = ( list(self.anchorClosed.keys()) +
-                list(self.dynamicClosed.keys()) )
+        closedNodeIds = ( list(self.anchorClosed.keys()))# +
+                #list(self.dynamicClosed.keys()) )
         points = map(self.env.getPointFromId, closedNodeIds)
         self.viz.markPoints(points, 90)
         self.viz.displayImage(1)

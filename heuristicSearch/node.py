@@ -33,6 +33,9 @@ class Node():
     def getParent(self):
         return self.parent
 
+    def isEqualTo(node):
+        return self.getNodeId() == node.getNodeId
+
     def setHasDummyG(self, value):
         self.hasDummyG = value
 
