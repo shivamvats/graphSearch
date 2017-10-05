@@ -22,23 +22,29 @@ def pointToRC(point):
 def plotStuff(planHValues, planTimePerState, stateHValues, planNodeIds=None,
         stateNodeIds=None):
     plt.figure(1)
-    plt.subplot(311)
+    ax = plt.subplot(211)
+    ax.set_title("Heuristic change per state")
+    #ax.set_xlabel("Nodes on path")
+    ax.set_ylabel(r"$\Delta h$")
     if planNodeIds is None:
         plt.plot(planHValues)
     else:
         plt.plot(planNodeIds, planHValues)
 
-    plt.subplot(312)
+    ax = plt.subplot(212)
+    ax.set_title("Time taken per state")
+    ax.set_xlabel("Nodes on path")
+    ax.set_ylabel(r"$\Delta t$")
     if planNodeIds is None:
         plt.plot(planTimePerState)
     else:
         plt.plot(planNodeIds, planTimePerState)
 
-    plt.subplot(313)
-    if stateNodeIds is None:
-        plt.plot(stateHValues)
-    else:
-        plt.plot(stateNodeIds, stateHValues)
+    #plt.subplot(313)
+    #if stateNodeIds is None:
+    #    plt.plot(stateHValues)
+    #else:
+    #    plt.plot(stateNodeIds, stateHValues)
     plt.show()
 
 def euclideanDistance( a, b ):

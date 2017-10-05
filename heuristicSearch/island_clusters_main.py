@@ -27,6 +27,13 @@ def main():
     startPoint, goalPoint = pickle.load( open(start_goal, "rb") )
     islandClusters = pickle.load( open(islands, "rb") )
 
+    # Ignore the states in between.
+    # Directly more towards the exit state.
+    activationCenters, exitStates = [], []
+    for cluster in islandClusters:
+        activationCenters.append(cluster[0])
+        exitStates.append(cluster[-1])
+
     print(islandClusters)
 
     occGrid = OccupancyGrid()
@@ -34,7 +41,7 @@ def main():
     print(occMap.shape)
 
     gridEnv = IslandClusterGridEnvironment(occMap, occMap.shape[0],
-            occMap.shape[1], islandClusters )
+            occMap.shape[1], activationCenters, exitStates )
     gridEnv.setHeuristic(0)
 
     viz = ImageVisualizer(occMap)
@@ -53,10 +60,10 @@ def main():
     startNode.setParent(None)
     goalNode = Node(gridEnv.getIdFromPoint(goalPoint))
     gridEnv.addNode(goalNode)
-    gridEnv.ISLANDTHRESH = 50
+    gridEnv.ISLANDTHRESH = 40
 
     planner = DynamicMHAstar(gridEnv, 2, 10)
-    planner.DEBUG = 1
+    planner.DEBUG = 0
     planFound = planner.plan(startNode, goalNode, viz=viz)
     #planFound = planner.plan(startNode, goalNode)
 

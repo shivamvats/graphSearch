@@ -15,28 +15,28 @@ class PeakFinder:
     def __init__(self):
         pass
 
-    def getTimePerState( self, planTime ):
-        planTimePerState = []
-        planTimePerState.append(0)
-        for i in range(1, len(planTime)):
-            planTimePerState.append( planTime[i] - planTime[i-1] )
-        return planTimePerState
+    def getPerState( self, planData ):
+        perState = []
+        perState.append(0)
+        for i in range(1, len(planData)):
+           perState.append( planData[i] - planData[i-1] )
+        return perState
 
-    def getPeaks( self, nodeIds, planTime ):
+    def getTimePeaks( self, nodeIds, planTime ):
         """Takes in nodeIDs and timestamps and returns the node ids of
         peaks sorted in descending order by time per state."""
         # The indices of nodeIds and planTime match.
         # Functions that operate on planTime must maintain this one-one
         # correspondence.
-        planTimePerState = self.getTimePerState( planTime )
+        planTimePerState = self.getPerState( planTime )
 
         peakNodeIds, peakTimePerState = [], []
         for i in range( 1, len(planTime) - 1 ):
             backwardDiff = planTimePerState[i] - planTimePerState[i-1]
             forwardDiff = planTimePerState[i+1] - planTimePerState[i]
-            # Note: The time per state must be positive, else it it not a peak.
-            if planTimePerState[i] > 0 and backwardDiff > 0 and forwardDiff < 0:
-            #if backwardDiff > 0 and forwardDiff < 0:
+            #if planTimePerState[i] > 0 and backwardDiff > 0 and forwardDiff < 0:
+            #if forwardDiff > 0:
+            if backwardDiff > 0:
                 peakNodeIds.append( nodeIds[i] )
                 peakTimePerState.append( planTimePerState[i] )
         # Sort according to time per state.
@@ -44,6 +44,35 @@ class PeakFinder:
         sortedIds = [node for _, node in sorted( zip(peakTimePerState, peakNodeIds),
             reverse=True )]
         print( sorted(peakTimePerState, reverse=True)[:5] )
+        return sortedIds
+
+    def getHeuristicPeaks( self, nodeIds, heuristic ):
+        """Takes in nodeIDs and heuristic and returns the node ids"""
+        # The indices of nodeIds and planTime match.
+        # Functions that operate on planTime must maintain this one-one
+        # correspondence.
+        heuristicChangePerState = self.getPerState( heuristic )
+
+        peakNodeIds, peakHeuristicPerState = [], []
+        for i in range( 1, len(heuristic) - 1 ):
+            backwardDiff = heuristicChangePerState[i] - heuristicChangePerState[i-1]
+            forwardDiff = heuristicChangePerState[i+1] - heuristicChangePerState[i]
+            # Note: The time per state must be positive, else it it not a peak.
+            if heuristicChangePerState[i] > 0 and backwardDiff > 0 and forwardDiff < 0:
+            #if backwardDiff > 0 and forwardDiff < 0:
+            #if heuristicChangePerState[i] < 0 and backwardDiff < 0 and forwardDiff > 0:
+                # Trough
+            #if forwardDiff > 0:
+            #if not forwardDiff <= 0:
+            #if heuristicChangePerState[i] > 0:
+                # Heuristic increasing.
+                peakNodeIds.append( nodeIds[i] )
+                peakHeuristicPerState.append( heuristicChangePerState[i] )
+        # Sort according to time per state.
+        print( len(peakHeuristicPerState) )
+        sortedIds = [node for _, node in sorted( zip(peakHeuristicPerState, peakNodeIds),
+            reverse=True )]
+        print( sorted(peakHeuristicPerState, reverse=True)[:5] )
         return sortedIds
 
     def savePeaks( self, timePeaks, heuristicPeaks ):
@@ -74,7 +103,7 @@ class PeakFinder:
         image = self.folder + "/image.png"
         start_goal = folder + "/start_goal.pkl"
         startPoint, goalPoint = pickle.load( open(start_goal, "rb") )
-        NUMTIMEPEAKS = 5
+        NUMTIMEPEAKS = 3
         NUMHEURISTICPEAKS = 3
 
         occGrid = OccupancyGrid()
@@ -145,6 +174,8 @@ class PeakFinder:
             for i in range(1, len(planHValues)):
                 planHeuristicPerState.append(max(0, planHValues[i] -
                     planHValues[i-1]) )
+                #planHeuristicPerState.append(planHValues[i] -
+                    #planHValues[i-1] )
 
         # plotStuff(planHValues, planTimePerState, stateHValues, planNodeIds,
         #           stateNodeIds)
@@ -156,29 +187,29 @@ class PeakFinder:
         for node in path:
             #print(node.getNodeId())
             pathPoints.append(self.gridEnv.getPointFromId(node.getNodeId()))
-        #viz.joinPointsInOrder(pathPoints, thickness=5)
+        viz.joinPointsInOrder(pathPoints, thickness=5)
 
         #----------------------------------------
         # Visualize the peaks
         # Extract the timestamps from values.
         pathPlanTime = [ planStats[node][0] for node in planNodeIds ]
         # Peaks has the node ids sorted according to the delta t.
-        peaks = self.getPeaks( planNodeIds, pathPlanTime )
+        peaks = self.getTimePeaks( planNodeIds, pathPlanTime )
         timePeaks = peaks[:NUMTIMEPEAKS]
 
         # Extract the heuristic values.
         pathPlanHeuristic= [ planStats[node][1] for node in planNodeIds ]
         # Peaks has the node ids sorted according to the delta t.
         print( "Finding heuristic peaks.")
-        peaks = self.getPeaks( planNodeIds, pathPlanHeuristic )
-        heuristicPeaks = peaks#[:NUMHEURISTICPEAKS]
+        peaks = self.getHeuristicPeaks( planNodeIds, pathPlanHeuristic )
+        heuristicPeaks = peaks[:NUMHEURISTICPEAKS]
         #for peak in timePeaks:
             #print(self.gridEnv.getPointFromId(peak))
 
         for peak in timePeaks:
             print("Marking the minima")
             #print(self.gridEnv.getPointFromId(peak))
-            viz.drawCircle(self.gridEnv.getPointFromId(peak), 5, color=(200,200,200), thickness=-1)
+            #viz.drawCircle(self.gridEnv.getPointFromId(peak), 5, color=(200,200,200), thickness=-1)
         for peak in heuristicPeaks:
             print("Marking the minima")
             viz.drawCircle(self.gridEnv.getPointFromId(peak), 5, color=(150,150,150), thickness=-1)
@@ -188,40 +219,10 @@ class PeakFinder:
         # Save the peaks in files.
         self.savePeaks( timePeaks, heuristicPeaks )
 
+
 def main():
     folder = sys.argv[1]
     peakFinder = PeakFinder()
     peakFinder.findPeaks(folder)
 main()
 
-# XXX Need to review this
-"""
-def getHeuristicDropPerState( planTime ):
-    planTimePerState = []
-    planTimePerState.append(0)
-    for i in range(1, len(planTime)):
-        planTimePerState.append( planTime[i-1] - planTime[i] )
-    return planTimePerState
-
-def getHeuristicPeaks( nodeIds, planTime ):
-    #Takes in nodeIDs and timestamps and returns the node ids of
-    #peaks sorted in descending order by time per state.
-    # The indices of nodeIds and planTime match.
-    # Functions that operate on planTime must maintain this one-one
-    # correspondence.
-    planTimePerState = getTimePerState( planTime )
-
-    peakNodeIds, peakTimePerState = [], []
-    for i in range( 1, len(planTime) - 1 ):
-        backwardDiff = planTimePerState[i] - planTimePerState[i-1]
-        forwardDiff = planTimePerState[i+1] - planTimePerState[i]
-        if backwardDiff < 0 and forwardDiff > 0:
-            peakNodeIds.append( nodeIds[i] )
-            peakTimePerState.append( planTimePerState[i] )
-    # Sort according to time per state.
-    print( len(peakTimePerState) )
-    sortedIds = [node for _, node in sorted( zip(peakTimePerState, peakNodeIds),
-        reverse=True )]
-    #print( sorted(peakTimePerState, reverse=True) )
-    return sortedIds
-"""

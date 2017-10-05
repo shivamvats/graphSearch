@@ -3,45 +3,21 @@ from node import Node
 import copy
 
 class IslandClusterGridEnvironment(GridEnvironment):
-    def __init__(self, envMap, rows, cols, islandClusters):
+    def __init__(self, envMap, rows, cols, activationCenters, exitStates):
         super(IslandClusterGridEnvironment, self).__init__(envMap, rows, cols)
-        self.addIslandClusters(islandClusters)
-        self.activeClusterIx = -1
+        # Should be a dict for fast check.
+        self.activationCenters = self._addIslands(activationCenters)
+        self.exitStates = self._addIslands(exitStates)
+        # Add an exit state as an island when near an activation center.
+        self.islands = []
 
-    def _createIslandDict(self):
-        islandDict = {}
-        for i in range(len(self.islandClusters)):
-            for j in range(len(self.islandClusters[i])):
-                # Store the position of island in the cluster.
-                islandDict[self.islandClusters[i][j]] = j
-        self.islandDict = islandDict
-        print(self.islandClusters)
-        print(self.islandDict)
-
-    def addIslandClusters(self, islandClusters):
-        self.islandClusters, self.islandClusterAvailable = [], []
-        for cluster in islandClusters:
-            nodeCluster = []
-            for island in cluster:
-                node = Node(self.getIdFromPoint(island))
-                node.history.append(node)
-                self.addNode(node)
-                nodeCluster.append(node.getNodeId())
-            self.islandClusters.append(nodeCluster)
-            # XXX 1 for available and 0 for not.
-            self.islandClusterAvailable.append(1)
-        # Create a dict of islands with island node id as key and (cluster,
-        # position) as value.
-        self._createIslandDict()
-
-        # Store exit states separately.
-        # Story index of cluster to which it belongs.
-        self.exitStates = {}
-        for i in range(len(self.islandClusters)):
-            self.exitStates[self.islandClusters[i][-1]] = i
-
-    def deleteIslandCluster(self, index):
-        del self.islandClusters[index]
+    def _addIslands(self, islands):
+        nodeIds = []
+        for island in islands:
+            node = Node(self.getIdFromPoint(island))
+            self.addNode(node)
+            nodeIds.append(node.getNodeId())
+        return nodeIds
 
     def _getNextIsland(self, cluster, node):
         #print(self.islandDict)
@@ -83,10 +59,15 @@ class IslandClusterGridEnvironment(GridEnvironment):
         #    heuristicCost += self.heuristic(start, goal)
         return heuristicCost
 
-    def islandHeuristic(self, currNode, island, goalNode):
-        if len(currNode.history) == 0:
-            return self.heuristic(currNode, island) + self.heuristic(island,
-                    goalNode)
+    def islandHeuristic(self, currNode, goalNode):
+        if self.islands:
+            island = self.islands[-1]
+            if self.islands[-1] not in currNode.history:
+                return ( self.heuristic(currNode, self.graph[island]) +
+                        self.heuristic(self.graph[island],
+                        goalNode) )
+            else:
+                return self.heuristic(currNode, goalNode)
         else:
             return self.heuristic(currNode, goalNode)
 

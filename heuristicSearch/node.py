@@ -8,7 +8,7 @@ class Node():
         self.nodeId = nodeId
 
         # For the n-island heuristic in local minima algo.
-        self.history = []
+        self.history = {}
 
         self.hasDummyG = False
 
