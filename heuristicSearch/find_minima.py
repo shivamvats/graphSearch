@@ -28,6 +28,8 @@ class PeakFinder:
         # The indices of nodeIds and planTime match.
         # Functions that operate on planTime must maintain this one-one
         # correspondence.
+        totalPlanTime = planTime[-1] - planTime[0]
+        thresh = 2 * (totalPlanTime) / len(planTime)
         planTimePerState = self.getPerState( planTime )
 
         peakNodeIds, peakTimePerState = [], []
@@ -36,7 +38,8 @@ class PeakFinder:
             forwardDiff = planTimePerState[i+1] - planTimePerState[i]
             #if planTimePerState[i] > 0 and backwardDiff > 0 and forwardDiff < 0:
             #if forwardDiff > 0:
-            if backwardDiff > 0:
+            #if backwardDiff > 0:
+            if planTimePerState[i] > thresh:
                 peakNodeIds.append( nodeIds[i] )
                 peakTimePerState.append( planTimePerState[i] )
         # Sort according to time per state.
@@ -58,13 +61,13 @@ class PeakFinder:
             backwardDiff = heuristicChangePerState[i] - heuristicChangePerState[i-1]
             forwardDiff = heuristicChangePerState[i+1] - heuristicChangePerState[i]
             # Note: The time per state must be positive, else it it not a peak.
-            if heuristicChangePerState[i] > 0 and backwardDiff > 0 and forwardDiff < 0:
+            #if heuristicChangePerState[i] > 0 and backwardDiff > 0 and forwardDiff < 0:
             #if backwardDiff > 0 and forwardDiff < 0:
             #if heuristicChangePerState[i] < 0 and backwardDiff < 0 and forwardDiff > 0:
                 # Trough
             #if forwardDiff > 0:
             #if not forwardDiff <= 0:
-            #if heuristicChangePerState[i] > 0:
+            if heuristicChangePerState[i] > 0:
                 # Heuristic increasing.
                 peakNodeIds.append( nodeIds[i] )
                 peakHeuristicPerState.append( heuristicChangePerState[i] )
@@ -195,24 +198,24 @@ class PeakFinder:
         pathPlanTime = [ planStats[node][0] for node in planNodeIds ]
         # Peaks has the node ids sorted according to the delta t.
         peaks = self.getTimePeaks( planNodeIds, pathPlanTime )
-        timePeaks = peaks[:NUMTIMEPEAKS]
+        timePeaks = peaks#[:NUMTIMEPEAKS]
 
         # Extract the heuristic values.
         pathPlanHeuristic= [ planStats[node][1] for node in planNodeIds ]
         # Peaks has the node ids sorted according to the delta t.
         print( "Finding heuristic peaks.")
         peaks = self.getHeuristicPeaks( planNodeIds, pathPlanHeuristic )
-        heuristicPeaks = peaks[:NUMHEURISTICPEAKS]
+        heuristicPeaks = peaks#[:NUMHEURISTICPEAKS]
         #for peak in timePeaks:
             #print(self.gridEnv.getPointFromId(peak))
 
         for peak in timePeaks:
             print("Marking the minima")
             #print(self.gridEnv.getPointFromId(peak))
-            #viz.drawCircle(self.gridEnv.getPointFromId(peak), 5, color=(200,200,200), thickness=-1)
+            viz.drawCircle(self.gridEnv.getPointFromId(peak), 5, color=(200,200,200), thickness=-1)
         for peak in heuristicPeaks:
             print("Marking the minima")
-            viz.drawCircle(self.gridEnv.getPointFromId(peak), 5, color=(150,150,150), thickness=-1)
+            #viz.drawCircle(self.gridEnv.getPointFromId(peak), 5, color=(150,150,150), thickness=-1)
         #---------------------------------------
         viz.displayImage()
 
