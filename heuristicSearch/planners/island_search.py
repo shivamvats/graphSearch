@@ -1,4 +1,4 @@
-from astar import *
+from heuristicSearch.planners.astar import *
 import time
 
 class IslandAstar(Astar):

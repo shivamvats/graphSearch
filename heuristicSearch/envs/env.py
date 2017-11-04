@@ -1,4 +1,4 @@
-from node import Node
+from ..graph.node import Node
 
 class Environment(object):
     def __init__(self, envMap):

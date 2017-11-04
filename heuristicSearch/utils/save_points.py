@@ -2,7 +2,7 @@ import pickle
 import sys
 
 from utils import *
-from occupancyGrid import OccupancyGrid
+from ..envs.occupancyGrid import OccupancyGrid
 
 def inputPoints( numPoints, occMap ):
     points = []

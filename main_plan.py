@@ -1,11 +1,11 @@
-from astar import Astar
-from env import GridEnvironment
-from node import Node
-from occupancyGrid import OccupancyGrid
-from visualizer import ImageVisualizer
-import matplotlib.pyplot as plt
-from utils import *
+from heuristicSearch.planners.astar import Astar
+from heuristicSearch.envs.env import GridEnvironment
+from heuristicSearch.graph.node import Node
+from heuristicSearch.envs.occupancy_grid import OccupancyGrid
+from heuristicSearch.utils.visualizer import ImageVisualizer
+from heuristicSearch.utils.utils import *
 
+import matplotlib.pyplot as plt
 import cv2 as cv
 import sys
 import pickle
@@ -62,34 +62,6 @@ def main():
             currNode = currNode.getParent()
         # Reverse the list.
         path = path[::-1]
-
-        planStateIds = map(lambda node : node.getNodeId(), path)
-        planStats = planner.getPlanStats()
-
-        # -----------------------------------
-        # Finding the local minima.
-        # Get the timestamps.
-        stateNodeIds = planStats.keys()
-        stateHValues = []
-        for i in planStats.values():
-            stateHValues.append(i[1])
-
-        planHValues, planTimeStamps, planTimePerState = [], [], []
-
-        planNodeIds = []
-        for stateId in planStateIds:
-            planNodeIds.append(stateId)
-            planHValues.append(planStats[stateId][1])
-            planTimeStamps.append(planStats[stateId][0])
-
-        # Start state.
-        planTimePerState = [0]
-        for i in range(1, len(planTimeStamps)):
-            planTimePerState.append(planTimeStamps[i] - planTimeStamps[i-1])
-
-        #plotStuff(planHValues, planTimePerState, stateHValues, planNodeIds,
-                  #stateNodeIds)
-        plotStuff(planHValues, planTimePerState, stateHValues)
 
     pathPoints = []
     for node in path:
