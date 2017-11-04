@@ -49,7 +49,7 @@ def main():
     gridEnv.setHeuristic(0)
 
     # For visualization.
-    viz = ImageVisualizer(occMap, True)
+    viz = ImageVisualizer(occMap, False)
 
     ## To take input by clicking.
     #startPoint = (100, 20)
@@ -69,7 +69,7 @@ def main():
     gridEnv.addNode(goalNode)
 
     # Choose your planner.
-    planner = Astar(gridEnv)
+    planner = Astar(gridEnv, inflation=5)
 
     # Plan!
     planFound = planner.plan(startNode, goalNode, viz=viz)
@@ -89,8 +89,7 @@ def main():
     for node in path:
         pathPoints.append(gridEnv.getPointFromId(node.getNodeId()))
 
-    viz.displayImage()
-    viz.joinPointsInOrder(pathPoints, thickness=5)
+    viz.joinPointsInOrder(pathPoints, thickness=2)
     viz.displayImage()
 
 main()
