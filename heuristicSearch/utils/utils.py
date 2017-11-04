@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 
 clickedR, clickedC = -1, -1
 def inputClickedPoint(image):
+    """Displays an environment and tells you the row and column number of a
+    clicked point in the map."""
     def clickCallback(event, x, y, flags, param):
         global clickedR, clickedC
         if event == cv.EVENT_LBUTTONDOWN:
