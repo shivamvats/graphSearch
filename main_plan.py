@@ -10,13 +10,30 @@ import cv2 as cv
 import sys
 import pickle
 
-def main():
-    """Numpy array is accessed as (r, c) while a point is (x, y). The code
-    follows (r, c) convention everywhere. Hence, be careful whenever using a
-    point with opencv.
+"""
+Note: Numpy array is accessed as (r, c) while a point is (x, y). The
+code follows (r, c) convention everywhere. Hence, be careful whenever
+using a point with opencv.
+"""
 
-    Takes one command line argument: Folder that has the environment and
-    config.
+def main():
+    """
+    The main function that sets up the environment and calls the planner.
+    Each planning run has three components:
+
+    * Environment
+    * Graph
+    * Planner
+
+    The Environment class contains details about the specific planning problem,
+    eg: a 2D map for 2D planning. Its primary role is to implement a
+    `getChildren` method that returns the successors of each node. This helps
+    in building the graph implicitly.
+
+    Each vertex in the graph is an instance of `Node` class. It stores details
+    specific to the node.
+
+    An Astar instance runs on the graph so created.
     """
 
     folder = sys.argv[1]
@@ -24,21 +41,24 @@ def main():
     start_goal = folder + "/start_goal.pkl"
     startPoint, goalPoint = pickle.load( open(start_goal, "rb") )
 
+    # Build the planning environment.
     occGrid = OccupancyGrid()
     occMap = occGrid.getMapFromImage(image)
     print(occMap.shape)
-
     gridEnv = GridEnvironment(occMap, occMap.shape[0], occMap.shape[1])
     gridEnv.setHeuristic(0)
 
-    viz = ImageVisualizer(occMap)
+    # For visualization.
+    viz = ImageVisualizer(occMap, True)
 
+    ## To take input by clicking.
     #startPoint = (100, 20)
     #goalPoint = (201, 200)
     #print("Click start point")
     #startPoint = inputClickedPoint(occMap)
     #print("Click end point")
     #goalPoint = inputClickedPoint(occMap)
+
     print(startPoint, goalPoint)
     assert(gridEnv.isValidPoint(startPoint))
     assert(gridEnv.isValidPoint(goalPoint))
@@ -48,9 +68,11 @@ def main():
     goalNode = Node(gridEnv.getIdFromPoint(goalPoint))
     gridEnv.addNode(goalNode)
 
+    # Choose your planner.
     planner = Astar(gridEnv)
+
+    # Plan!
     planFound = planner.plan(startNode, goalNode, viz=viz)
-    #planFound = planner.plan(startNode, goalNode)
 
     path = []
     if planFound:
@@ -65,7 +87,6 @@ def main():
 
     pathPoints = []
     for node in path:
-        #print(node.getNodeId())
         pathPoints.append(gridEnv.getPointFromId(node.getNodeId()))
 
     viz.displayImage()

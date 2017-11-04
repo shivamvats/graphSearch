@@ -4,9 +4,9 @@ import timeit
 import collections
 
 class Astar(object):
-    def __init__(self, env):#, fileName):
+    def __init__(self, env, inflation=10):
         self.env = env
-        #self.fileName = fileName
+        self.inflation = inflation
 
     def updateG(self, node, newG):
         if(node.getG() > newG):
@@ -15,13 +15,8 @@ class Astar(object):
         else:
             return 0
 
-
     def getPlanStats(self):
         return self.stateTimeStamps
-
-    #def saveStatsToFile(self):
-    #    with open(self.fileName, 'w') as f:
-
 
     #@profile
     def plan(self, startNode, goalNode, viz=None):
@@ -51,11 +46,12 @@ class Astar(object):
             stateTimeStamps[nodeId] = (time.time(), currNode.getH())
             closed[nodeId] = 1
 
-            #viz.markPoint(self.env.getPointFromId(currNode.getNodeId()), 0)
-            #viz.displayImage(1)
+            if viz.incrementalDisplay:
+                viz.markPoint(self.env.getPointFromId(currNode.getNodeId()), 0)
+                viz.displayImage(1)
 
             children, edgeCosts = \
-            self.env.getChildrenAndCosts(currNode)
+                    self.env.getChildrenAndCosts(currNode)
             for child, edgeCost in zip(children, edgeCosts):
                 if child.getNodeId() in closed:
                     continue
@@ -67,7 +63,7 @@ class Astar(object):
                 if updated:
                     child.setParent(currNode)
                     #XXX What if this node is already in the open list?
-                    openQ.put((child.getG() + 10*child.getH(), child))
+                    openQ.put((child.getG() + self.inflation*child.getH(), child))
 
         self.stateTimeStamps = stateTimeStamps
 
@@ -75,7 +71,7 @@ class Astar(object):
         timeTaken = endTime - startTime
         print("Total time taken for planning is %f", timeTaken)
         #print(self.stateTimeStamps)
-        print("Nodes expaneded", len(closed))
+        print("Nodes expanded", len(closed))
 
         closedNodeIds = list(closed.keys())
         points = map(self.env.getPointFromId, closedNodeIds)

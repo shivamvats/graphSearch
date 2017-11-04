@@ -7,10 +7,11 @@ class Visualizer(object):
         pass
 
 class ImageVisualizer(Visualizer):
-    def __init__(self, backgroundImage):
+    def __init__(self, backgroundImage, incrementalDisplay=False):
         super(ImageVisualizer, self).__init__()
         self.backgroundImage = backgroundImage
         self.plottedImage = copy.copy(self.backgroundImage)
+        self.incrementalDisplay = incrementalDisplay
 
     def resetImage( self ):
         self.plottedImage = copy.copy(self.backgroundImage)
