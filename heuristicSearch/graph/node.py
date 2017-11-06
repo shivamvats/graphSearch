@@ -12,6 +12,9 @@ class Node():
         self.viaIsland = viaIsland
         #self.hasDummyG = False
 
+        # If using multiple islands.
+        self.history = {}
+
     def setG(self, newG):
         self.g = newG
 

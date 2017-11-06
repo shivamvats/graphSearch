@@ -1,12 +1,11 @@
-from dynamic_mha import DynamicMHAstar
-from island_cluster_env import IslandClusterGridEnvironment
-from node import Node
-from occupancyGrid import OccupancyGrid
-from visualizer import ImageVisualizer
+from heuristicSearch.planners.dynamic_mha import DynamicMHAstar
+from heuristicSearch.envs.island_cluster_env import IslandClusterGridEnvironment
+from heuristicSearch.graph.node import Node
+from heuristicSearch.envs.occupancyGrid import OccupancyGrid
+from heuristicSearch.utils.visualizer import ImageVisualizer
+from heuristicSearch.utils.utils import *
+
 import matplotlib.pyplot as plt
-from utils import *
-
-
 import cv2 as cv
 import sys
 import pickle

@@ -1,5 +1,5 @@
 from env import GridEnvironment
-from node import Node
+from ..graph.node import Node
 import copy
 
 class IslandClusterGridEnvironment(GridEnvironment):
