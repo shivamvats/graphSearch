@@ -43,3 +43,8 @@ def plotStuff(planHValues, planTimePerState, stateHValues, planNodeIds=None,
         plt.plot(stateNodeIds, stateHValues)
     plt.show()
 
+def euclideanDistance( a, b ):
+    """Assumes inputs are tuples."""
+    return ( ( a[0] - b[0] )**2 + ( a[1] - b[1] )**2 )**.5
+
+

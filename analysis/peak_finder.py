@@ -1,10 +1,10 @@
-from ..heuristicSearch.planners.astar import Astar
-from ..heuristicSearch.envs.env import GridEnvironment
-from ..heuristicSearch.graph.node import Node
-from ..heuristicSearch.envs.occupancyGrid import OccupancyGrid
-from ..heuristicSearch.utils.visualizer import ImageVisualizer
-from ..heuristicSearch.utils.utils import *
-from ..heuristicSearch.utils.save_points import savePoints
+from heuristicSearch.planners.astar import Astar
+from heuristicSearch.envs.env import GridEnvironment
+from heuristicSearch.graph.node import Node
+from heuristicSearch.envs.occupancyGrid import OccupancyGrid
+from heuristicSearch.utils.visualizer import ImageVisualizer
+from heuristicSearch.utils.utils import *
+from heuristicSearch.utils.save_points import savePoints
 
 import matplotlib.pyplot as plt
 import cv2 as cv
