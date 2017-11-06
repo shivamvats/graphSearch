@@ -10,15 +10,17 @@ class DynamicMHAstar():
     # and that is the dynamically generated heuristic.
     def __init__(self, env, w1, w2):
         self.env = env
-        self.anchorQ = []
-        # Using a dictionary 'cos list has slow lookup.
-        self.anchorClosed = {}
 
         self.w1 = w1
         self.w2 = w2
-        self.inadQs = []
-        self.inadHeurs = []
-        self.numInadHeurs = 0
+        # The convention is that the first element in these lists correspond to
+        # the anchor heuristic.
+        self.queues = {}
+        self.heurs = {}
+        self.numHeurs = 0
+
+        # Using a dictionary 'cos list has slow lookup.
+        self.anchorClosed = {}
 
     def updateG(self, node, newG):
         if(node.getG() > newG):
@@ -27,35 +29,29 @@ class DynamicMHAstar():
         else:
             return 0
 
-    def addHeuristic(self, heuristic):
+    def addHeuristic(self, heuristic, index):
         """Add a new heuristic and a separate Open queue for it."""
-        self.inadQs.append( [] )
-        self.inadHeurs.append( heuristic )
-        self.numInadHeurs += 1
+        self.queues[index] = []
+        self.heurs[index] = heuristic
+        self.numHeurs += 1
 
     def addDynamicHeuristic(self, heuristic, index):
         """Dynamic MHA* specific function.
         'index' is the index of the heuristic.
         'heuristic' is a function that takes in start and goal nodes and returns
         the heuristic cost."""
-        # XXX I am copying the open list of anchor. Not sure if this is the
-        # right thing to do in MHA*. In my case, I am not using any
-        # inadmissible heuristic, so it is fine.
-        self.addHeuristic(heuristic)
-        anchorOpenNodes = [ y for x, y in self.anchorQ ]
-        self.inadQs[index] = [ (node.getG() + self.w1 * heuristic(node, self.goalNode), node) for node in
+        self.addHeuristic(heuristic, index)
+        anchorOpenNodes = [ y for x, y in self.queues[0] ]
+        self.queues[index] = [ (node.getG() + self.w1 * heuristic(node, self.goalNode), node) for node in
                 anchorOpenNodes ]
-        Q.heapify( self.inadQs[index] )
-        self.dynamicClosed = {}
+        Q.heapify( self.queues[index] )
+        # If using closed, then we will need a list of closed queues.
+        #self.dynamicClosed = {}
 
     def deleteHeuristic(self, index):
-        del self.inadQs[index]
-        del self.inadHeurs[index]
+        self.queues[index] = None
+        self.heurs[index] = None
         self.numInadHeurs -= 1
-
-    def deleteDynamicHeuristic(self):
-        # Assumes no other inadmissible heuristic is being used.
-        self.deleteHeuristic(0)
 
     def getPlanStats(self):
         return self.stateTimeStamps
@@ -123,10 +119,14 @@ class DynamicMHAstar():
 
         self.startNode.setG(0)
         self.goalNode.setG( float("inf") )
+        # Add the anchor queue and heuristic.
+        self.queues[0] = []
+        self.heurs[0] = self.env.heuristic
+        anchorQ = self.queue[0]
+
         heuristicCost = self.env.heuristic(startNode, goalNode)
         startNode.setH(heuristicCost)
-
-        Q.heappush( self.anchorQ, ( startNode.getG() + self.w1 * startNode.getH(), startNode) )
+        Q.heappush( anchorQ, ( startNode.getG() + self.w1 * startNode.getH(), startNode) )
 
         currNode = startNode
         startTime = time.time()

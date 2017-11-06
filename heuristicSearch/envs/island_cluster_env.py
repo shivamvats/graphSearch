@@ -3,21 +3,24 @@ from ..graph.node import Node
 import copy
 
 class IslandClusterGridEnvironment(GridEnvironment):
-    def __init__(self, envMap, rows, cols, activationCenters, exitStates):
+    def __init__(self, envMap, rows, cols, entryStates, exitStates):
         super(IslandClusterGridEnvironment, self).__init__(envMap, rows, cols)
-        # Should be a dict for fast check.
-        self.activationCenters = self._addIslands(activationCenters)
+        assert(len(entryStates) == len(exitStates))
+
+        # Island - key dict.
+        self.entryStates = self._addIslands(entryStates)
         self.exitStates = self._addIslands(exitStates)
         # Add an exit state as an island when near an activation center.
         self.islands = []
 
     def _addIslands(self, islands):
-        nodeIds = []
-        for island in islands:
+        islandNodeDict = {}
+        for i, island in enumerate(islands):
             node = Node(self.getIdFromPoint(island))
             self.addNode(node)
-            nodeIds.append(node.getNodeId())
-        return nodeIds
+            # We want to reserve the key 0 for goal.
+            nodeIslandDict[node.getNodeId()] = i + 1
+        return nodeIslandDict
 
     def _getNextIsland(self, cluster, node):
         #print(self.islandDict)
