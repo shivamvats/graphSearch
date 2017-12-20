@@ -1,22 +1,8 @@
-import Queue as Q
-import time
-import timeit
-import collections
+from astar import *
 
-class Astar(object):
+class IslandAstar(Astar):
     def __init__(self, env, inflation=10):
-        self.env = env
-        self.inflation = inflation
-
-    def updateG(self, node, newG):
-        if(node.getG() > newG):
-            node.setG(newG)
-            return 1
-        else:
-            return 0
-
-    def getPlanStats(self):
-        return self.stateTimeStamps
+        super(IslandAstar, self).__init__(env, inflation)
 
     #@profile
     def plan(self, startNode, goalNode, viz=None):
@@ -56,15 +42,17 @@ class Astar(object):
             for child, edgeCost in zip(children, edgeCosts):
                 if child.getNodeId() in closed:
                     continue
-
-                if child.getH() == float("inf"):
-                    child.setH(self.env.heuristic(child, goalNode))
-
                 updated = self.updateG(child, currNode.getG() + edgeCost)
                 if updated:
                     child.setParent(currNode)
+                    if currNode.getNodeId() in self.env.islandNodeIds:
+                        child.viaIsland = True
+                    else:
+                        child.viaIsland = currNode.viaIsland
+
                     #XXX What if this node is already in the open list?
-                    openQ.put((child.getG() + self.inflation*child.getH(), child))
+                    openQ.put((child.getG() +
+                        self.inflation*self.env.heuristic(child, goalNode), child))
 
         self.stateTimeStamps = stateTimeStamps
 

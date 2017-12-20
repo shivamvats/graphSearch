@@ -46,10 +46,10 @@ def main():
     occMap = occGrid.getMapFromImage(image)
     print(occMap.shape)
     gridEnv = GridEnvironment(occMap, occMap.shape[0], occMap.shape[1])
-    gridEnv.setHeuristic(0)
+    gridEnv.setHeuristicType(0)
 
     # For visualization.
-    viz = ImageVisualizer(occMap, False)
+    viz = ImageVisualizer(occMap, True)
 
     ## To take input by clicking.
     #startPoint = (100, 20)

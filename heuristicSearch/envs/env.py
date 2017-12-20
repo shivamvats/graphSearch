@@ -70,12 +70,10 @@ class GridEnvironment(Environment):
 
             if(self.graph.has_key(nodeId)):
                 childNode = self.graph[nodeId]
-                childrenNodes.append(childNode)
-
             else:
                 childNode = Node(nodeId)
                 self.graph[nodeId] = childNode
-                childrenNodes.append(childNode)
+            childrenNodes.append(childNode)
 
         return (childrenNodes, edgeCosts)
 
@@ -115,8 +113,13 @@ class GridEnvironment(Environment):
         D2 = 1.5
         return D * (dr + dc) + (D2 - 2 * D) * min(dr, dc)
 
-    def setHeuristic(self, heuristicType=1):
+    def setHeuristicType(self, heuristicType=1):
         self.heuristicType = heuristicType
+
+    def setHeuristic(self, heuristic):
+        """heuristic takes in currNode and goalNode and returns the heuristic
+        cost."""
+        self.heuristic = heuristic
 
     def heuristic(self, currNode, goalNode, *args):
         if self.heuristicType == 0:

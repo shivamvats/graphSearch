@@ -1,4 +1,4 @@
-from node import Node
+from heuristicSearch.graph.node import Node
 from env import GridEnvironment
 
 class IslandGridEnvironment(GridEnvironment):
@@ -12,10 +12,10 @@ class IslandGridEnvironment(GridEnvironment):
         self.activatedIslandNodes = []
 
         for point in islandPoints:
-           islandId = self.getIdFromPoint(point)
-           self.islandNodeIds.append(islandId)
-           if not self.graph.has_key(islandId):
-               self.graph[islandId] = Node(islandId)
+            islandId = self.getIdFromPoint(point)
+            self.islandNodeIds.append(islandId)
+            if not self.graph.has_key(islandId):
+                self.graph[islandId] = Node(islandId)
 
     def setIslandThresh(self, thresh):
         self.islandThresh = thresh

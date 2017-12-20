@@ -1,4 +1,3 @@
-
 class Node():
     """Base class representing an abstract Node. It contains the bare minimum
     information required for heuristic search."""
