@@ -93,8 +93,9 @@ class GridEnvironment(Environment):
         else:
             return False
 
-    def addNode(self, newNode):
-        self.graph[newNode.getNodeId()] = newNode
+    def addNode(self, nodeId):
+        if not self.graph.has_key(nodeId):
+            self.graph[nodeId] = Node(nodeId)
 
     def euclideanHeuristic(self, currNode, goalNode):
         currPoint = self.getPointFromId(currNode.getNodeId())
