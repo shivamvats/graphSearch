@@ -6,19 +6,18 @@ from env import GridEnvironment
 class MultiIslandGridEnvironment(GridEnvironment):
     """Implements a planning environment for a multi-island A* search."""
 
-    def __init__(self, envMap, rows, cols, islandRegions):
+    def __init__(self, envMap, rows, cols):
         super(MultiIslandGridEnvironment, self).__init__(envMap, rows, cols)
-        self.islandRegions = islandRegions
 
     @property
     def islandRegions(self):
         return self._islandRegions
 
-    @property.setter
+    @islandRegions.setter
     def islandRegions(self, regions):
         self._islandRegions = regions
         for islandRegion in self._islandRegions:
-            islandId = self.getIdFromPoint(islandRegion.island)
+            islandId = islandRegion.island.getNodeId()
             self.addNode(islandId)
         #self.islandNodeIds = []
         #self.activatedIslandNodes = []
@@ -30,7 +29,7 @@ class MultiIslandGridEnvironment(GridEnvironment):
         #        self.graph[islandId] = Node(islandId)
 
     def getIslandNodeIds(self):
-        nodeIds = map(lambda x: self.getIdFromPoint(x.island),
+        nodeIds = map(lambda x: x.island.getNodeId(),
                 self._islandRegions)
         return nodeIds
 
@@ -55,14 +54,22 @@ class MultiIslandGridEnvironment(GridEnvironment):
         # TODO Do not return already used (inactive) islands.
         for region in self._islandRegions:
             if region.contains(self.getPointFromId(node.getNodeId())):
-                nodeId = self.getIdFromPoint(region.island)
+                nodeId = region.island.getNodeId()
                 childNode = self.graph[nodeId]
                 cost = self.heuristic(node, childNode)
                 dummyChildrenNodes.append(childNode)
                 dummyEdgeCosts.append(cost)
-        #if node.checkDummyG():
-        #    for childNode in childrenNodes:
-        #        childNode.setHasDummyG(True)
-
         return ((childrenNodes, edgeCosts), (dummyChildrenNodes,
                 dummyEdgeCosts))
+
+    def hValue(self, node, goal, inflation, island=None):
+        """Calculate heuristic via island if provided and cost is within
+        suboptimality."""
+        if island and self.heuristic(node, island) + self.heuristic(island, \
+                goal) <= inflation*self.heuristic(node, goal):
+            return self.heuristic(node, island) + self.heuristic(island, goal)
+        else:
+            return self.heuristic(node, goal)
+
+    def fValue(self, node, goal, island=None):
+        return node.gValue() + self.hValue(node, goal, island)

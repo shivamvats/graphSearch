@@ -1,4 +1,4 @@
-from heuristicCost.utils.utils import euclideanDistance
+from heuristicSearch.utils.utils import euclideanDistance
 
 class CircularRegion():
     """Models an arbitrary continuous shape/region. Center is a 2D coordinate
@@ -19,11 +19,11 @@ class CircularRegion():
     def radius(self):
         return self._radius
 
-    @property.setter
+    @center.setter
     def center(self, center):
         self._center = center
 
-    @property.setter
+    @radius.setter
     def radius(self, radius):
         self._radius = radius
 

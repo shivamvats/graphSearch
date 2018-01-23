@@ -6,7 +6,8 @@ class IslandRegion():
     stored by a region class.
     * Implements `contains` method that checks if a given point is
     inside the region or not.
-    * Deals with `points`."""
+    * An island is a Node.
+    * The region used coordinates."""
 
     def __init__(self, island=None, region=None):
         if island is None or region is None:
@@ -18,15 +19,19 @@ class IslandRegion():
     def island(self):
         return self._island
 
-    @property.setter
+    @island.setter
     def island(self, island):
         self._island = island
+
+    @property
+    def region(self):
+        return self._region
 
     @property
     def inflation(self):
         return self._inflation
 
-    @property.setter
+    @inflation.setter
     def inflation(self, inflation):
         self._inflation = inflation
 

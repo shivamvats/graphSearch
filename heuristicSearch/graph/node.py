@@ -11,6 +11,20 @@ class Node():
         self.viaIsland = viaIsland
         #self.hasDummyG = False
 
+        # Multi-Island Search stuff
+        self._g1 = float("inf")
+
+    @property
+    def g1(self):
+        return self._g1
+
+    @g1.setter
+    def g1(self, val):
+        self._g1 = val
+
+    def gValue(self):
+        return self.g1 + self.h1
+
     def setG(self, newG):
         self.g = newG
 
