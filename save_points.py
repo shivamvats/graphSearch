@@ -1,8 +1,8 @@
 import pickle
 import sys
 
-from utils import *
-from ..envs.occupancyGrid import OccupancyGrid
+from heuristicSearch.utils.utils import *
+from heuristicSearch.envs.occupancyGrid import OccupancyGrid
 
 def inputPoints( numPoints, occMap ):
     points = []
