@@ -47,7 +47,7 @@ def main():
     assert(gridEnv.isValidPoint(goalPoint))
 
     # Set up island regions.
-    islandRegions = constructIslandRegions(gridEnv, folder, radius=20,
+    islandRegions = constructIslandRegions(gridEnv, folder, radius=50,
             inflation=5)
     gridEnv.islandRegions = islandRegions
 

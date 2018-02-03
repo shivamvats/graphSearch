@@ -41,9 +41,14 @@ class MultiIslandGridEnvironment(GridEnvironment):
         self.addNode(node.getNodeId())
         point = self.getPointFromId(node.getNodeId())
 
-        children, edgeCosts = self.getNeighbours(point[0], point[1])
+        children_, edgeCosts_ = self.getNeighbours(point[0], point[1])
+        children, edgeCosts = [], []
+        for child, cost in zip(children_, edgeCosts_):
+            if not any(region.contains(child) for region in
+                    self.islandRegions):
+                children.append(child), edgeCosts.append(cost)
         childrenNodes = []
-        for child in children:
+        for i, child in enumerate(children):
             nodeId = self.getIdFromPoint(child)
             self.addNode(nodeId)
             childNode = self.graph[nodeId]
