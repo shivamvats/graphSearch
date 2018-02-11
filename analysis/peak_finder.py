@@ -93,6 +93,18 @@ class PeakFinder:
         savePoints( map( self.gridEnv.getPointFromId, sortPeaks( heuristicPeaks ) ),
                 self.folder + "/heuristic_peaks.pkl" )
 
+    def plotDeltaHeuristic(self, heuristicValues):
+        minH = heuristicValues[0]
+        prevH = heuristicValues[0]
+        deltaH = []
+        for h in heuristicValues:
+            deltaH.append(h - minH)
+            if h < minH:
+                minH = h
+            #prevH = h
+        plt.plot(deltaH)
+        plt.show()
+
     def findPeaks(self, folder):
         """Numpy array is accessed as (r, c) while a point is (x, y). The code
         follows (r, c) convention everywhere. Hence, be careful whenever using a
@@ -133,7 +145,7 @@ class PeakFinder:
         goalNode = Node(self.gridEnv.getIdFromPoint(goalPoint))
         self.gridEnv.addNode(goalNode)
 
-        planner = Astar(self.gridEnv)
+        planner = Astar(self.gridEnv, inflation=10)
         planFound = planner.plan(startNode, goalNode, viz=viz)
         #planFound = planner.plan(startNode, goalNode)
 
@@ -182,8 +194,8 @@ class PeakFinder:
 
         # plotStuff(planHValues, planTimePerState, stateHValues, planNodeIds,
         #           stateNodeIds)
-            #plotStuff(planHValues, planTimePerState, stateHValues)
-            plotStuff(planHeuristicPerState, planTimePerState, stateHValues)
+            #plotStuff(planHeuristicPerState, planTimePerState, stateHValues)
+            self.plotDeltaHeuristic(stateHValues)
 
         # Visualize the path.
         pathPoints = []
@@ -210,11 +222,12 @@ class PeakFinder:
             #print(self.gridEnv.getPointFromId(peak))
 
         for peak in timePeaks:
-            print("Marking the minima")
+            pass
+            #print("Marking the minima")
             #print(self.gridEnv.getPointFromId(peak))
             #viz.drawCircle(self.gridEnv.getPointFromId(peak), 5, color=(200,200,200), thickness=-1)
         for peak in heuristicPeaks:
-            print("Marking the minima")
+            #print("Marking the minima")
             viz.drawCircle(self.gridEnv.getPointFromId(peak), 5, color=(150,150,150), thickness=-1)
         #---------------------------------------
         viz.displayImage()

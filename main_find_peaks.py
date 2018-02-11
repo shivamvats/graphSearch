@@ -89,7 +89,7 @@ def main():
 
         #plotStuff(planHValues, planTimePerState, stateHValues, planNodeIds,
                   #stateNodeIds)
-        plotStuff(planHValues, planTimePerState, stateHValues)
+        plotStuff(None, planTimePerState, stateHValues)
 
     pathPoints = []
     for node in path:
