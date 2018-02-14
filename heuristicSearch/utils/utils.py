@@ -1,5 +1,9 @@
 import cv2 as cv
 import matplotlib.pyplot as plt
+import pickle
+import sys
+
+from heuristicSearch.envs.occupancyGrid import OccupancyGrid
 
 clickedR, clickedC = -1, -1
 def inputClickedPoint(image):
@@ -47,4 +51,13 @@ def euclideanDistance( a, b ):
     """Assumes inputs are tuples."""
     return ( ( a[0] - b[0] )**2 + ( a[1] - b[1] )**2 )**.5
 
+def inputPoints( numPoints, occMap ):
+    points = []
+    for i in range(numPoints):
+        print("Click on an point")
+        point = inputClickedPoint(occMap)
+        points.append(point)
+    return points
 
+def savePoints(points, fileName):
+    pickle.dump( points, open(fileName, "wb") )

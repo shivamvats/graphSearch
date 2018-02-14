@@ -1,19 +1,4 @@
-import pickle
-import sys
-
-from utils import *
-from ..envs.occupancyGrid import OccupancyGrid
-
-def inputPoints( numPoints, occMap ):
-    points = []
-    for i in range(numPoints):
-        print("Click on an point")
-        point = inputClickedPoint(occMap)
-        points.append(point)
-    return points
-
-def savePoints(points, fileName):
-    pickle.dump( points, open(fileName, "wb") )
+from heuristicSearch.utils.utils import *
 
 def inputSavePoints():
     """Function to input and pickle points.
@@ -32,3 +17,4 @@ def inputSavePoints():
 
 if __name__ == "__main__":
     inputSavePoints()
+
