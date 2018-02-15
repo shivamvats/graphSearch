@@ -19,6 +19,8 @@ class MultiIslandGridEnvironment(GridEnvironment):
         for islandRegion in self._islandRegions:
             islandId = islandRegion.island.getNodeId()
             self.addNode(islandId)
+        self.activatedIslandRegions = [False for island in self._islandRegions]
+        self.expandedIslandRegions = [False for island in self._islandRegions]
         #self.islandNodeIds = []
         #self.activatedIslandNodes = []
 
@@ -33,9 +35,13 @@ class MultiIslandGridEnvironment(GridEnvironment):
                 self._islandRegions)
         return nodeIds
 
-    def activateIslandNode(self, node):
-        if node not in self.activatedIslandNodes:
-            self.activatedIslandNodes.append(node)
+    #def activateIslandNode(self, node):
+    #    if node not in self.activatedIslandNodes:
+    #        self.activatedIslandNodes.append(node)
+
+    def getExpandedIslandRegions(self):
+        return [region for region, expanded in zip(self.islandRegions,
+                self.expandedIslandRegions) if expanded]
 
     def getChildrenWithIslandsAndCosts(self, node):
         self.addNode(node.getNodeId())
@@ -43,10 +49,12 @@ class MultiIslandGridEnvironment(GridEnvironment):
 
         children_, edgeCosts_ = self.getNeighbours(point[0], point[1])
         children, edgeCosts = [], []
-        for child, cost in zip(children_, edgeCosts_):
-            if not any(region.contains(child) for region in
-                    self.islandRegions):
-                children.append(child), edgeCosts.append(cost)
+        #for child, cost in zip(children_, edgeCosts_):
+        #    if not any(region.contains(child) for region in
+        #            self.islandRegions):
+        #        children.append(child), edgeCosts.append(cost)
+        children, edgeCosts = children_, edgeCosts_
+
         childrenNodes = []
         for i, child in enumerate(children):
             nodeId = self.getIdFromPoint(child)
@@ -57,8 +65,9 @@ class MultiIslandGridEnvironment(GridEnvironment):
         dummyChildrenNodes, dummyEdgeCosts = [], []
         flag = 0
         # TODO Do not return already used (inactive) islands.
-        for region in self._islandRegions:
+        for i, region in enumerate(self._islandRegions):
             if region.contains(self.getPointFromId(node.getNodeId())):
+                self.activatedIslandRegions[i] = True
                 nodeId = region.island.getNodeId()
                 childNode = self.graph[nodeId]
                 cost = self.heuristic(node, childNode)
@@ -76,5 +85,5 @@ class MultiIslandGridEnvironment(GridEnvironment):
         else:
             return self.heuristic(node, goal)
 
-    def fValue(self, node, goal, island=None):
-        return node.gValue() + self.hValue(node, goal, island)
+    def fValue(self, node, goal, inflation=1, island=None):
+        return node.gValue() + inflation*self.hValue(node, goal, island)

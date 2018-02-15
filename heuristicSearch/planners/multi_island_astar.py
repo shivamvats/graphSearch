@@ -9,23 +9,42 @@ class MultiIslandAstar(Astar):
         """Dummy Expansion"""
         [children, edgeCosts], [dummyChildren, dummyEdgeCosts] = \
                 self.env.getChildrenWithIslandsAndCosts(currNode)
-        print(len(children), len(dummyChildren))
         # TODO Nodes falling inside an influence region should be inserted into
         # the corresponding open list.
         for child, edgeCost in zip(children, edgeCosts):
             #if child.getNodeId() in self.Closed:
                 #continue
             if currNode.gValue() + edgeCost < child.gValue():
-                child.g1, child.h1 = (currNode.g1 + edgeCost), currNode.h1
-                child.setParent(currNode)
-                Q.heappush(self.Open, (self.env.fValue(child,
-                           self.goalNode), child))
+                def _dropIslandRegionNodes(child):
+                    for i, region in enumerate(self.env.islandRegions):
+                        if (self.env.activatedIslandRegions[i] and not self.env.expandedIslandRegions[i] and
+                                region.contains(self.env.getPointFromId(child.getNodeId()))):
+                            return True
+                if not _dropIslandRegionNodes(child):
+                    child.g1, child.h1 = (currNode.g1 + edgeCost), currNode.h1
+                    child.setParent(currNode)
+                # Insert child into an island Open list if it falls inside its
+                # influence region.
+                #def _insertIntoIslandOpen(child):
+                #    inserted = False
+                #    for i, region in enumerate(self.env.islandRegions):
+                #        if self.env.activatedIslandRegions[i] and region.contains(self.env.getPointFromId(child.getNodeId())):
+                #            Q.heappush(self.IslandOpen[i], (self.env.fValue(child,
+                #                    self.goalNode, inflation=self.inflation, island=region.island), child))
+                #            inserted = True
+                #    return inserted
+
+                #if not _insertIntoIslandOpen(child):
+                    Q.heappush(self.Open, (self.env.fValue(child, \
+                            self.goalNode, inflation=self.inflation), child))
         for child, edgeCost in zip(dummyChildren, dummyEdgeCosts):
             if currNode.gValue() + edgeCost < child.gValue():
                 child.g1, child.h1 = currNode.g1, currNode.h1 + edgeCost
                 child.setParent(currNode)
+                print("Dummy child", self.env.fValue(child, self.goalNode,
+                    inflation=self.inflation))
                 Q.heappush(self.Open, (self.env.fValue(child,
-                           self.goalNode), child))
+                           self.goalNode, inflation=self.inflation), child))
 
     #@profile
     def plan(self, startNode, goalNode, viz=None):
@@ -42,18 +61,25 @@ class MultiIslandAstar(Astar):
         # Using a dictionary 'cos list has slow lookup.
         self.Closed = {}
 
-        Q.heappush(self.Open, (self.env.fValue(startNode, goalNode), startNode))
+        Q.heappush(self.Open, (self.env.fValue(startNode, goalNode, \
+                inflation=self.inflation), startNode))
         currNode = startNode
         startTime = time.time()
 
         # Dummy Planning
         counter = 0
-        while(len(self.Open) and currNode != self.goalNode):
+        while(len(self.Open) and currNode.getNodeId() !=
+                self.goalNode.getNodeId()):
             priority, currNode = Q.heappop(self.Open)
             nodeId = currNode.getNodeId()
-            print(len(self.Open))
             if nodeId in self.Closed:
                 continue
+            try:
+                index = [region.island.getNodeId() for region in
+                        self.env.islandRegions].index(nodeId)
+                self.env.expandedIslandRegions[index] = True
+            except ValueError:
+                pass
 
             self._expand1(currNode)
             self.Closed[nodeId] = 1

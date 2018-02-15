@@ -13,6 +13,10 @@ class Node():
 
         # Multi-Island Search stuff
         self._g1 = float("inf")
+        # Keep track of the islands the shortest path to this node goes
+        # through.
+        # Primary operation is query, hence implemented as a dictionary.
+        self.history = {}
 
     @property
     def g1(self):

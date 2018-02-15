@@ -48,7 +48,7 @@ def main():
 
     # Set up island regions.
     islandRegions = constructIslandRegions(gridEnv, folder, radius=50,
-            inflation=5)
+            inflation=10)
     gridEnv.islandRegions = islandRegions
 
     # For visualization.
@@ -62,7 +62,7 @@ def main():
     gridEnv.addNode(goalNode)
 
     # Choose your planner.
-    planner = MultiIslandAstar(gridEnv, inflation=5)
+    planner = MultiIslandAstar(gridEnv, inflation=2)
 
     # Plan!
     planFound = planner.plan(startNode, goalNode, viz=viz)
@@ -71,7 +71,7 @@ def main():
     if planFound:
         print("Planning successful")
         # Retrieve the path.
-        currNode = goalNode
+        currNode = gridEnv.graph[goalNode.getNodeId()]
         while(currNode != startNode):
             path.append(currNode)
             currNode = currNode.getParent()
@@ -82,7 +82,7 @@ def main():
     for node in path:
         pathPoints.append(gridEnv.getPointFromId(node.getNodeId()))
 
-    viz.joinPointsInOrder(pathPoints, thickness=2)
+    #viz.joinPointsInOrder(pathPoints, thickness=2)
     viz.displayImage()
 
 main()
