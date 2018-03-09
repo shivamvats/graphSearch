@@ -43,6 +43,9 @@ class MultiIslandGridEnvironment(GridEnvironment):
         return [region for region, expanded in zip(self.islandRegions,
                 self.expandedIslandRegions) if expanded]
 
+    def getIslandIds(self):
+        return [region.island.getNodeId() for region in self.islandRegions]
+
     def getChildrenWithIslandsAndCosts(self, node):
         self.addNode(node.getNodeId())
         point = self.getPointFromId(node.getNodeId())

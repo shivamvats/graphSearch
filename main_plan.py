@@ -78,8 +78,8 @@ def main():
     if planFound:
         print("Planning successful")
         # Retrieve the path.
-        currNode = goalNode
-        while(currNode != startNode):
+        currNode = gridEnv.graph[goalNode.getNodeId()]
+        while(currNode.getNodeId() != startNode.getNodeId()):
             path.append(currNode)
             currNode = currNode.getParent()
         # Reverse the list.

@@ -67,12 +67,8 @@ class GridEnvironment(Environment):
         childrenNodes = []
         for child in children:
             nodeId = self.getIdFromPoint(child)
-
-            if(self.graph.has_key(nodeId)):
-                childNode = self.graph[nodeId]
-            else:
-                childNode = Node(nodeId)
-                self.graph[nodeId] = childNode
+            self.addNode(nodeId)
+            childNode = self.graph[nodeId]
             childrenNodes.append(childNode)
 
         return (childrenNodes, edgeCosts)
@@ -95,7 +91,9 @@ class GridEnvironment(Environment):
 
     def addNode(self, nodeId):
         if not self.graph.has_key(nodeId):
-            self.graph[nodeId] = Node(nodeId)
+            node = Node(nodeId)
+            node.g1, node.h1 = float('inf'), float('inf')
+            self.graph[nodeId] = node
 
     def euclideanHeuristic(self, currNode, goalNode):
         currPoint = self.getPointFromId(currNode.getNodeId())

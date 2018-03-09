@@ -46,6 +46,15 @@ class MultiIslandAstar(Astar):
                 Q.heappush(self.Open, (self.env.fValue(child,
                            self.goalNode, inflation=self.inflation), child))
 
+        def _expand2(self, currNode, goal, Open):
+            succs, costs = self.env.getChildrenAndCosts(currNode)
+            for succ, cost in zip(succs, costs):
+                if currNode.gValue() + cost < succ.gValue():
+                    succ.g1 = currNode.g1 + cost
+                    succ.h1 = currNode.h1
+                    Q.heappush(Open, (self.env.fValue(succ, goal,
+                        inflation=self.inflation), succ))
+
     #@profile
     def plan(self, startNode, goalNode, viz=None):
         self.startNode = startNode
@@ -63,33 +72,94 @@ class MultiIslandAstar(Astar):
 
         Q.heappush(self.Open, (self.env.fValue(startNode, goalNode, \
                 inflation=self.inflation), startNode))
-        currNode = startNode
         startTime = time.time()
 
         # Dummy Planning
-        counter = 0
-        while(len(self.Open) and currNode.getNodeId() !=
-                self.goalNode.getNodeId()):
-            priority, currNode = Q.heappop(self.Open)
-            nodeId = currNode.getNodeId()
-            if nodeId in self.Closed:
-                continue
-            try:
-                index = [region.island.getNodeId() for region in
-                        self.env.islandRegions].index(nodeId)
-                self.env.expandedIslandRegions[index] = True
-            except ValueError:
-                pass
+        def _dummyPlanning():
+            currNode = self.Open[0][1]
+            while(len(self.Open) and currNode.getNodeId() !=
+                    self.goalNode.getNodeId()):
+                priority, currNode = Q.heappop(self.Open)
+                nodeId = currNode.getNodeId()
+                if nodeId in self.Closed:
+                    continue
+                try:
+                    index = self.env.getIslandIds().index(nodeId)
+                    self.env.expandedIslandRegions[index] = True
+                except ValueError:
+                    pass
 
-            self._expand1(currNode)
-            self.Closed[nodeId] = 1
-            stateTimeStamps[nodeId] = (time.time(), currNode.getH())
-            if viz.incrementalDisplay:
-                viz.markPoint(self.env.getPointFromId(currNode.getNodeId()), 0)
-                viz.displayImage(1)
-            counter += 1
-            #if counter == 5:
-                #return
+                self._expand1(currNode)
+                self.Closed[nodeId] = 1
+                stateTimeStamps[nodeId] = (time.time(), currNode.getH())
+                if viz.incrementalDisplay:
+                    viz.markPoint(self.env.getPointFromId(currNode.getNodeId()), 0)
+                    viz.displayImage(1)
+
+        _dummyPlanning()
+
+        # Refinement
+        def _findFirstIsland(goalNode):
+            currNode = self.env.graph[goalNode.getNodeId()]
+            path = []
+            while(currNode != startNode):
+                path.append(currNode)
+                currNode = currNode.getParent()
+            # Reverse the list.
+            path = path[::-1]
+            # node is the first island on dummy path.
+            island = next(node for node in path if node.h1 > 0)
+            return (path, island)
+
+        goalNode = self.env.graph[goalNode.getNodeId()]
+        while goalNode.h1 > 0:
+            # Find first island.
+            path, island = _findFirstIsland(goalNode)
+            entry = island.getParent()
+
+            # h1 cost from entry to island
+            h1Decrement = island.h1 - entry.h1
+            index = self.env.getIslandIds().index(island.getNodeId())
+            queue = self.IslandOpen[index]
+            Q.heappush(queue, (self.env.fValue(entry,
+                    island, inflation=self.inflation), entry))
+
+            # Start A*
+            node = entry
+            while(queue[0][0] <= self.inflation*self.env.heuristic(startNode,
+                queue[0][1]) and node.getNodeId() != island.getNodeId()):
+                _, node = Q.heappop(queue)
+                self._expand2(node, island, queue)
+
+            def _updateNodesInPath(path, island, g1Increment, h1Decrement):
+                index = path.index(island)
+                for i in range(index, len(path)):
+                    vertex = path[i]
+                    vertex.g1 += g1Increment
+                    vertex.h1 -= h1Decrement
+
+            if node.getNodeId() == island.getNodeId():
+                # Dummy path refined.
+                g1Increment = island.g1 - entry.g1
+                _updateNodesInPath(path, island, g1Increment, h1Decrement)
+            else:
+                # Alternate path being explored.
+                # XXX What if goal is reached?
+                minCost, minNode = queue[0]
+                g1Increment = minNode.g1 - entry.g1
+                # Update the g1 and h1 values of island based on the minimum of
+                # queue.
+                island.g1, island.h1 = minNode.g1, self.env.heuristic(minNode,
+                        island)
+                index = path.index(island)
+                h1Decrement -= self.env.heuristic(minNode, island)
+                _updateNodesInPath(path, island, g1Increment, h1Decrement)
+
+                Q.heappush(self.Open, (self.env.fValue(island, goalNode,
+                        inflation=self.inflation), island))
+
+                # Find another path to the goal.
+                _dummyPlanning()
 
         self.stateTimeStamps = stateTimeStamps
 
