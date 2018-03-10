@@ -4,6 +4,8 @@ class Node():
     def __init__(self, nodeId, viaIsland=False):
         self._g = float("inf")
         self._h = float("inf")
+        # For LPA*
+        self._v = float("inf")
         self.nodeId = nodeId
 
         # Island search stuff
@@ -19,6 +21,10 @@ class Node():
     def h(self):
         return self._h
 
+    @property
+    def v(self):
+        return self._v
+
     @g.setter
     def g(self, newG):
         self._g = newG
@@ -26,6 +32,10 @@ class Node():
     @h.setter
     def h(self, newH):
         self._h = newH
+
+    @v.setter
+    def v(self, newV):
+        self._v = newV
 
     def setParent(self, parent):
         self.parent = parent
