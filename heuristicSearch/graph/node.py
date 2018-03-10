@@ -2,8 +2,8 @@ class Node():
     """Base class representing an abstract Node. It contains the bare minimum
     information required for heuristic search."""
     def __init__(self, nodeId, viaIsland=False):
-        self.g = float("inf")
-        self.h = float("inf")
+        self._g = float("inf")
+        self._h = float("inf")
         self.nodeId = nodeId
 
         # Island search stuff
@@ -11,17 +11,24 @@ class Node():
         self.viaIsland = viaIsland
         #self.hasDummyG = False
 
-    def setG(self, newG):
-        self.g = newG
+    @property
+    def g(self):
+        return self._g
 
-    def setH(self, newH):
-        self.h = newH
+    @property
+    def h(self):
+        return self._h
+
+    @g.setter
+    def g(self, newG):
+        self._g = newG
+
+    @h.setter
+    def h(self, newH):
+        self._h = newH
 
     def setParent(self, parent):
         self.parent = parent
-
-    def getG(self):
-        return self.g
 
     def getH1(self):
         return self.h1
@@ -37,9 +44,6 @@ class Node():
 
     def isViaIsland(self):
         return self.viaIsland
-
-    def getH(self):
-        return self.h
 
     def getNodeId(self):
         return self.nodeId
