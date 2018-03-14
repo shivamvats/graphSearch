@@ -33,6 +33,18 @@ def constructIslandRegions(env, folder, radius=20, inflation=10):
         islandRegions.append(islandRegion)
     return islandRegions
 
+def makePrettyViz(viz, islandRegions, startPoint, goalPoint):
+    for i, region in enumerate(islandRegions):
+        viz.drawCircle(region.region.center, region.region.radius)
+        viz.drawCircle(region.region.center, 3, thickness=-1)
+        viz.writeText("I%d"%(i+1), region.region.center[::-1], size=.8)
+
+    viz.drawCircle(startPoint, 5, thickness=-1)
+    viz.writeText("start", startPoint[::-1])
+    viz.drawCircle(goalPoint, 5, thickness=-1)
+    viz.writeText("goal", goalPoint[::-1])
+    viz.saveImage("planning_env.jpg")
+
 def main():
     folder = sys.argv[1]
     image = folder + "/image.png"
@@ -47,19 +59,18 @@ def main():
     assert(gridEnv.isValidPoint(goalPoint))
 
     # Set up island regions.
-    islandRegions = constructIslandRegions(gridEnv, folder, radius=80,
+    islandRegions = constructIslandRegions(gridEnv, folder, radius=90,
             inflation=10)
     gridEnv.islandRegions = islandRegions
 
     # For visualization.
     viz = ImageVisualizer(occMap, True)
-    for region in islandRegions:
-        viz.drawCircle(region.region.center, region.region.radius)
+    makePrettyViz(viz, islandRegions, startPoint, goalPoint)
 
     startNode = Node(gridEnv.getIdFromPoint(startPoint))
     startNode.setParent(None)
     goalNode = Node(gridEnv.getIdFromPoint(goalPoint))
-    gridEnv.addNode(goalNode)
+    gridEnv.addNode(goalNode.getNodeId())
 
     # Choose your planner.
     planner = MultiIslandAstar(gridEnv, inflation=2)

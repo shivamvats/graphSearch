@@ -48,6 +48,13 @@ class ImageVisualizer(Visualizer):
         cv.waitKey(waitTime)
         #cv.destroyAllWindows()
 
+    def saveImage(self, fileName):
+        cv.imwrite(fileName, self.plottedImage)
+
+    def writeText(self, text, position, size=1, font=cv.FONT_HERSHEY_SIMPLEX):
+        cv.putText(self.plottedImage, text, position, font,
+                size, (55,55,55), 2)
+
 
 
 
