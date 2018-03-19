@@ -25,7 +25,8 @@ class IslandAstar(Astar):
 
         currNode = startNode
         startTime = time.time()
-        while(not openQ.empty() and currNode != self.goalNode):
+        while(not openQ.empty() and currNode.getNodeId() !=
+                self.goalNode.getNodeId()):
             priority, currNode = openQ.get()
             nodeId = currNode.getNodeId()
             if nodeId in closed:

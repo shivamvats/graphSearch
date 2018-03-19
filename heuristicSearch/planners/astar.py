@@ -48,7 +48,7 @@ class Astar(object):
             closed[nodeId] = 1
 
             if viz.incrementalDisplay:
-                viz.markPoint(self.env.getPointFromId(currNode.getNodeId()), 0)
+                viz.markPoint(self.env.getPointFromId(currNode.getNodeId()), 100)
                 viz.displayImage(1)
 
             children, edgeCosts = \

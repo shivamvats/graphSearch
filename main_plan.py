@@ -69,7 +69,7 @@ def main():
     gridEnv.addNode(goalNode)
 
     # Choose your planner.
-    planner = Astar(gridEnv, inflation=5)
+    planner = Astar(gridEnv, inflation=1)
 
     # Plan!
     planFound = planner.plan(startNode, goalNode, viz=viz)
@@ -84,6 +84,7 @@ def main():
             currNode = currNode.getParent()
         # Reverse the list.
         path = path[::-1]
+        print("Cost of solution is %f"%path[-1].g)
 
     pathPoints = []
     for node in path:

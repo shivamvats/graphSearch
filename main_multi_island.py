@@ -59,8 +59,8 @@ def main():
     assert(gridEnv.isValidPoint(goalPoint))
 
     # Set up island regions.
-    islandRegions = constructIslandRegions(gridEnv, folder, radius=90,
-            inflation=10)
+    islandRegions = constructIslandRegions(gridEnv, folder, radius=61,
+            inflation=1.2)
     gridEnv.islandRegions = islandRegions
 
     # For visualization.
@@ -83,6 +83,7 @@ def main():
         print("Planning successful")
         # Retrieve the path.
         currNode = gridEnv.graph[goalNode.getNodeId()]
+        print("Solution cost: %f"%currNode.gValue())
         while(currNode != startNode):
             path.append(currNode)
             currNode = currNode.getParent()

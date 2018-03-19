@@ -33,3 +33,19 @@ class CircularRegion():
         else:
             return False
 
+    def boundaryContains(self, point, neighbours):
+        if self.contains(point) and any([not self.contains(neighbour) for
+                neighbour in neighbours]):
+            return True
+        else:
+            return False
+
+    def interiorContains(self, point, neighbours):
+        if self.contains(point) and not self.boundaryContains(point,
+                neighbours):
+            return True
+        else:
+            return False
+
+
+

@@ -55,7 +55,7 @@ def main():
     #cv.destroyAllWindows()
 
     # Planner
-    planner = IslandAstar( gridEnv )
+    planner = IslandAstar( gridEnv, inflation=1)
     planFound = planner.plan(startNode, goalNode, viz=viz)
 
     path = []
@@ -67,6 +67,8 @@ def main():
             currNode = currNode.getParent()
         # Reverse the list.
         path = path[::-1]
+
+        print("Solution cost is %d"%path[-1].g)
 
         planStateIds = map(lambda node : node.getNodeId(), path)
 

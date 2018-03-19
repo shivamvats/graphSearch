@@ -47,9 +47,6 @@ class Node():
     def setH1(self, val):
         self.h1 = val
 
-    def getGvalue(self):
-        return self.g + self.h1
-
     def setViaIsland(self, viaIsland):
         self.viaIsland = viaIsland
 

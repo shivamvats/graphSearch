@@ -20,9 +20,13 @@ class MultiIslandAstar(Astar):
                         if (self.env.activatedIslandRegions[i] and not self.env.expandedIslandRegions[i] and
                                 region.contains(self.env.getPointFromId(child.getNodeId()))):
                             return True
-                if not _dropIslandRegionNodes(child):
+                if True: #not _dropIslandRegionNodes(child):
                     child.g1, child.h1 = (currNode.g1 + edgeCost), currNode.h1
                     child.setParent(currNode)
+                    child.history = currNode.history
+                    for region in self.env.islandRegions:
+                        if currNode.getNodeId() == region.island.getNodeId():
+                            child.history[currNode.getNodeId()] = True
                 # Insert child into an island Open list if it falls inside its
                 # influence region.
                 #def _insertIntoIslandOpen(child):
@@ -36,24 +40,38 @@ class MultiIslandAstar(Astar):
 
                 #if not _insertIntoIslandOpen(child):
                     Q.heappush(self.Open, (self.env.fValue(child, \
-                            self.goalNode, inflation=self.inflation), child))
+                            self.goalNode, inflation=1), child))
         for child, edgeCost in zip(dummyChildren, dummyEdgeCosts):
             if currNode.gValue() + edgeCost < child.gValue():
                 child.g1, child.h1 = currNode.g1, currNode.h1 + edgeCost
                 child.setParent(currNode)
                 print("Dummy child", self.env.fValue(child, self.goalNode,
-                    inflation=self.inflation))
+                    inflation=1))
                 Q.heappush(self.Open, (self.env.fValue(child,
-                           self.goalNode, inflation=self.inflation), child))
+                           self.goalNode, inflation=1), child))
 
-        def _expand2(self, currNode, goal, Open):
-            succs, costs = self.env.getChildrenAndCosts(currNode)
-            for succ, cost in zip(succs, costs):
-                if currNode.gValue() + cost < succ.gValue():
-                    succ.g1 = currNode.g1 + cost
-                    succ.h1 = currNode.h1
-                    Q.heappush(Open, (self.env.fValue(succ, goal,
-                        inflation=self.inflation), succ))
+    def _expand2(self, currNode, goal, Open, island=None):
+        succs, costs = self.env.getChildrenAndCosts(currNode)
+        for succ, cost in zip(succs, costs):
+            if currNode.gValue() + cost <= succ.g1 + 1.5*succ.getH1():
+                succ.g1 = currNode.g1 + cost
+                succ.h1 = currNode.h1
+                Q.heappush(Open, (self.env.fValue(succ, goal,
+                        island=island, inflation=1), succ))
+
+    def _printDummySearchStats(self):
+        islandIds = self.env.getIslandIds()
+        print("Printing dummy planning related stats.")
+        goal = self.env.graph[self.goalNode.getNodeId()]
+        print("Goal: f = %f, g1 = %f, h1 = %f"%(self.env.fValue(goal, goal),
+            goal.g1, goal.getH1()))
+        for i, iid in enumerate(islandIds):
+            node = self.env.graph[iid]
+            print("Island%d : f = %f, gValue = %f, g1 = %f, h1 = %f"%(i,
+                    self.env.fValue(node, self.goalNode), node.gValue(), node.g1,
+                    node.getH1()))
+        print("Nodes expanded: %d"%len(self.Closed.keys()))
+
 
     #@profile
     def plan(self, startNode, goalNode, viz=None):
@@ -69,9 +87,10 @@ class MultiIslandAstar(Astar):
         self.Open = []
         # Using a dictionary 'cos list has slow lookup.
         self.Closed = {}
+        self.islandClosed = {}
 
         Q.heappush(self.Open, (self.env.fValue(startNode, goalNode, \
-                inflation=self.inflation), startNode))
+                inflation=1), startNode))
         startTime = time.time()
 
         # Dummy Planning
@@ -88,15 +107,31 @@ class MultiIslandAstar(Astar):
                     self.env.expandedIslandRegions[index] = True
                 except ValueError:
                     pass
+                def suspendNode(nodeId):
+                    for region in self.env.islandRegions:
+                        point = self.env.getPointFromId(nodeId)
+                        neighbours, _ = self.env.getNeighbours(point[0],
+                                point[1])
+                        if region.interiorContains(point, neighbours):
+                            if not (region.island.getNodeId() in
+                                    currNode.history) and not (nodeId ==
+                                    region.island.getNodeId()):
+                                return True
+                    return False
+                if suspendNode(nodeId):
+                    continue
 
                 self._expand1(currNode)
                 self.Closed[nodeId] = 1
                 stateTimeStamps[nodeId] = (time.time(), currNode.getH())
                 if viz.incrementalDisplay:
-                    viz.markPoint(self.env.getPointFromId(currNode.getNodeId()), 0)
+                    viz.markPoint(self.env.getPointFromId(currNode.getNodeId()), 100)
                     viz.displayImage(1)
+            print("Dummy planning done.")
 
         _dummyPlanning()
+        self._printDummySearchStats()
+        viz.saveImage("dummy_planning.jpg")
 
         # Refinement
         def _findFirstIsland(goalNode):
@@ -121,15 +156,24 @@ class MultiIslandAstar(Astar):
             h1Decrement = island.h1 - entry.h1
             index = self.env.getIslandIds().index(island.getNodeId())
             queue = self.IslandOpen[index]
-            Q.heappush(queue, (self.env.fValue(entry,
-                    island, inflation=self.inflation), entry))
+            Q.heappush(queue, (self.env.fValue(entry, goalNode,
+                    island=island), entry))
 
+            #print(queue[0][0], self.inflation*self.env.heuristic(startNode,
+                    #queue[0][1]))
             # Start A*
             node = entry
-            while(queue[0][0] <= self.inflation*self.env.heuristic(startNode,
-                queue[0][1]) and node.getNodeId() != island.getNodeId()):
+            print("Starting Refinement")
+            while(queue[0][0] <= self.env.islandRegions[index].inflation*self.env.fValue(island,
+                    goalNode) and node.getNodeId() != island.getNodeId()):
                 _, node = Q.heappop(queue)
-                self._expand2(node, island, queue)
+                if node.getNodeId() in self.islandClosed:
+                    continue
+                self._expand2(node, goalNode, queue, island=island)
+                self.islandClosed[node.getNodeId()] = 1
+                if viz.incrementalDisplay:
+                    viz.markPoint(self.env.getPointFromId(node.getNodeId()), 100)
+                    viz.displayImage(1)
 
             def _updateNodesInPath(path, island, g1Increment, h1Decrement):
                 index = path.index(island)
@@ -156,7 +200,7 @@ class MultiIslandAstar(Astar):
                 _updateNodesInPath(path, island, g1Increment, h1Decrement)
 
                 Q.heappush(self.Open, (self.env.fValue(island, goalNode,
-                        inflation=self.inflation), island))
+                        inflation=1), island))
 
                 # Find another path to the goal.
                 _dummyPlanning()
@@ -167,16 +211,16 @@ class MultiIslandAstar(Astar):
         timeTaken = endTime - startTime
         print("Total time taken for planning is %f", timeTaken)
         #print(self.stateTimeStamps)
-        print("Nodes expanded", len(self.Closed))
+        print("Nodes expanded", len(self.Closed) + len(self.islandClosed))
 
         closedNodeIds = list(self.Closed.keys())
         points = map(self.env.getPointFromId, closedNodeIds)
         viz.markPoints(points, 90)
         viz.displayImage(1)
-        if currNode.getNodeId() == self.goalNode.getNodeId():
-            return 1
-        else:
-            return 0
+        #if currNode.getNodeId() == self.goalNode.getNodeId():
+            #return 1
+        #else:
+            #return 0
 
 
 

@@ -38,3 +38,6 @@ class IslandRegion():
     def contains(self, point):
         """Assumes `point` is a 2D coordinate."""
         return self._region.contains(point)
+
+    def interiorContains(self, point, neighbours):
+        return self._region.interiorContains(point, neighbours)

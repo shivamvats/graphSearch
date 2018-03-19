@@ -54,7 +54,7 @@ class GridEnvironment(Environment):
                             elif j == 0:
                                 edgeCosts.append(1)
                             else:
-                                edgeCosts.append(2)
+                                edgeCosts.append(1.5)
         #print(neighbours)
         return (neighbours, edgeCosts)
 
