@@ -73,7 +73,7 @@ def main():
     gridEnv.addNode(goalNode.getNodeId())
 
     # Choose your planner.
-    planner = MultiIslandAstar(gridEnv, inflation=2)
+    planner = MultiIslandAstar(gridEnv, inflation=1.2)
 
     # Plan!
     planFound = planner.plan(startNode, goalNode, viz=viz)

@@ -53,11 +53,10 @@ class MultiIslandAstar(Astar):
     def _expand2(self, currNode, goal, Open, island=None):
         succs, costs = self.env.getChildrenAndCosts(currNode)
         for succ, cost in zip(succs, costs):
-            if currNode.gValue() + cost <= succ.g1 + 1.5*succ.getH1():
+            if currNode.gValue() + cost <= succ.gValue():
                 succ.g1 = currNode.g1 + cost
                 succ.h1 = currNode.h1
-                Q.heappush(Open, (self.env.fValue(succ, goal,
-                        island=island, inflation=1), succ))
+                Q.heappush(Open, (self.env.fValue(succ, goal, inflation=1), succ))
 
     def _printDummySearchStats(self):
         islandIds = self.env.getIslandIds()
@@ -156,8 +155,7 @@ class MultiIslandAstar(Astar):
             h1Decrement = island.h1 - entry.h1
             index = self.env.getIslandIds().index(island.getNodeId())
             queue = self.IslandOpen[index]
-            Q.heappush(queue, (self.env.fValue(entry, goalNode,
-                    island=island), entry))
+            Q.heappush(queue, (self.env.fValue(entry, island), entry))
 
             #print(queue[0][0], self.inflation*self.env.heuristic(startNode,
                     #queue[0][1]))
@@ -169,7 +167,7 @@ class MultiIslandAstar(Astar):
                 _, node = Q.heappop(queue)
                 if node.getNodeId() in self.islandClosed:
                     continue
-                self._expand2(node, goalNode, queue, island=island)
+                self._expand2(node, island, queue)
                 self.islandClosed[node.getNodeId()] = 1
                 if viz.incrementalDisplay:
                     viz.markPoint(self.env.getPointFromId(node.getNodeId()), 100)
