@@ -11,6 +11,24 @@ class Node():
         self.viaIsland = viaIsland
         #self.hasDummyG = False
 
+        # Multi-Island Search stuff
+        self._g1 = float("inf")
+        # Keep track of the islands the shortest path to this node goes
+        # through.
+        # Primary operation is query, hence implemented as a dictionary.
+        self.history = {}
+
+    @property
+    def g1(self):
+        return self._g1
+
+    @g1.setter
+    def g1(self, val):
+        self._g1 = val
+
+    def gValue(self):
+        return self.g1 + self.h1
+
     def setG(self, newG):
         self.g = newG
 
@@ -28,9 +46,6 @@ class Node():
 
     def setH1(self, val):
         self.h1 = val
-
-    def getGvalue(self):
-        return self.g + self.h1
 
     def setViaIsland(self, viaIsland):
         self.viaIsland = viaIsland

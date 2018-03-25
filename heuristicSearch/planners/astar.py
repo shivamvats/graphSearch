@@ -22,7 +22,6 @@ class Astar(object):
     def plan(self, startNode, goalNode, viz=None):
         self.startNode = startNode
         self.goalNode = goalNode
-        print(goalNode.getNodeId())
 
         # Ordered List of expanded sates and their timestamps.
         stateTimeStamps = collections.OrderedDict()
@@ -39,7 +38,8 @@ class Astar(object):
 
         currNode = startNode
         startTime = time.time()
-        while(not openQ.empty() and currNode != self.goalNode):
+        while(not openQ.empty() and currNode.getNodeId() !=
+                self.goalNode.getNodeId()):
             priority, currNode = openQ.get()
             nodeId = currNode.getNodeId()
             if nodeId in closed:
@@ -48,7 +48,7 @@ class Astar(object):
             closed[nodeId] = 1
 
             if viz.incrementalDisplay:
-                viz.markPoint(self.env.getPointFromId(currNode.getNodeId()), 0)
+                viz.markPoint(self.env.getPointFromId(currNode.getNodeId()), 100)
                 viz.displayImage(1)
 
             children, edgeCosts = \
