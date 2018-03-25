@@ -63,8 +63,4 @@ class IslandGridEnvironment(GridEnvironment):
                 edgeCosts.append(cost)
                 flag = 1
                 break
-        if node.checkDummyG():
-            for childNode in childrenNodes:
-                childNode.setHasDummyG(True)
-
         return (childrenNodes, edgeCosts, flag)
