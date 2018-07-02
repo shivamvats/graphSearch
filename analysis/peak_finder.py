@@ -101,7 +101,6 @@ class PeakFinder:
         Takes one command line argument: Folder that has the environment and
         config.
         """
-
         self.folder = folder
         image = self.folder + "/image.png"
         start_goal = folder + "/start_goal.pkl"
@@ -114,16 +113,9 @@ class PeakFinder:
         print(occMap.shape)
 
         self.gridEnv = GridEnvironment(occMap, occMap.shape[0], occMap.shape[1])
-        self.gridEnv.setHeuristic(0)
+        self.gridEnv.setHeuristicType(0)
+        viz = ImageVisualizer(occMap, False)
 
-        viz = ImageVisualizer(occMap)
-
-        #startPoint = (100, 20)
-        #goalPoint = (201, 200)
-        #print("Click start point")
-        #startPoint = inputClickedPoint(occMap)
-        #print("Click end point")
-        #goalPoint = inputClickedPoint(occMap)
         print(startPoint, goalPoint)
         assert(self.gridEnv.isValidPoint(startPoint))
         assert(self.gridEnv.isValidPoint(goalPoint))
@@ -135,14 +127,13 @@ class PeakFinder:
 
         planner = Astar(self.gridEnv)
         planFound = planner.plan(startNode, goalNode, viz=viz)
-        #planFound = planner.plan(startNode, goalNode)
 
         path = []
         planNodeIds = []
         if planFound:
             print("Planning successful")
             # Retrieve the path.
-            currNode = goalNode
+            currNode = self.gridEnv.graph[goalNode.getNodeId()]
             while(currNode != startNode):
                 path.append(currNode)
                 currNode = currNode.getParent()
@@ -206,16 +197,11 @@ class PeakFinder:
         print( "Finding heuristic peaks.")
         peaks = self.getHeuristicPeaks( planNodeIds, pathPlanHeuristic )
         heuristicPeaks = peaks#[:NUMHEURISTICPEAKS]
-        #for peak in timePeaks:
-            #print(self.gridEnv.getPointFromId(peak))
 
         for peak in timePeaks:
-            print("Marking the minima")
-            #print(self.gridEnv.getPointFromId(peak))
-            #viz.drawCircle(self.gridEnv.getPointFromId(peak), 5, color=(200,200,200), thickness=-1)
-        for peak in heuristicPeaks:
-            print("Marking the minima")
-            viz.drawCircle(self.gridEnv.getPointFromId(peak), 5, color=(150,150,150), thickness=-1)
+            viz.drawCircle(self.gridEnv.getPointFromId(peak), 5, color=(200,200,200), thickness=-1)
+        #for peak in heuristicPeaks:
+            #viz.drawCircle(self.gridEnv.getPointFromId(peak), 5, color=(150,150,150), thickness=-1)
         #---------------------------------------
         viz.displayImage()
 

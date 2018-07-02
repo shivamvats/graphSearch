@@ -29,6 +29,7 @@ class Astar(object):
         self.startNode.setG(0)
         heuristicCost = self.env.heuristic(startNode, goalNode)
         startNode.setH(heuristicCost)
+        print("Heuristic estimate of solution: ", heuristicCost)
 
         openQ = Q.PriorityQueue()
         # Using a dictionary 'cos list has slow lookup.
@@ -70,18 +71,18 @@ class Astar(object):
 
         endTime = time.time()
         timeTaken = endTime - startTime
+        if currNode.getNodeId() != self.goalNode.getNodeId():
+            print("No plan found.")
+            return 0
+
         print("Total time taken for planning is %f", timeTaken)
-        #print(self.stateTimeStamps)
         print("Nodes expanded", len(closed))
 
         closedNodeIds = list(closed.keys())
         points = map(self.env.getPointFromId, closedNodeIds)
         viz.markPoints(points, 90)
         viz.displayImage(1)
-        if currNode.getNodeId() == self.goalNode.getNodeId():
-            return 1
-        else:
-            return 0
+        return 1
 
 
 

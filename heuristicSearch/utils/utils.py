@@ -25,18 +25,21 @@ def plotStuff(planHValues, planTimePerState, stateHValues, planNodeIds=None,
         stateNodeIds=None):
     plt.figure(1)
     plt.subplot(311)
+    plt.ylabel("Heuristic Values of Path")
     if planNodeIds is None:
         plt.plot(planHValues)
     else:
         plt.plot(planNodeIds, planHValues)
 
     plt.subplot(312)
+    plt.ylabel("Time Per State")
     if planNodeIds is None:
         plt.plot(planTimePerState)
     else:
         plt.plot(planNodeIds, planTimePerState)
 
     plt.subplot(313)
+    plt.ylabel("Heuristic Values of Expanded States")
     if stateNodeIds is None:
         plt.plot(stateHValues)
     else:

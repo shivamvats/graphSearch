@@ -11,18 +11,20 @@ def sampleNormal(mean=0, dev=1):
     return dev*sample + mean
 
 
-def generateRandomImage(size=(100, 100), mean=1, dev=1):
+def generateRandomImage(size=(100, 100), mean=0, dev=1):
     randomMap = np.zeros(shape=size)
     randomMap.fill(255)
     for row in range(size[0]):
         for col in range(size[1]):
-            randNormalVal = sampleNormal(mean, dev)
+            randNormalVal = (sampleNormal(mean, dev) + 1)/2
             randNormalTruncated = min(randNormalVal, 1)
-            randNormalTruncated = max(randNormalVal, 0)
+            randNormalTruncated = max(randNormalTruncated, 0)
             randPixelVal = 255*randNormalTruncated
-            if randPixelVal < 50:
+            if randPixelVal < 120:
                 randomMap.itemset((row, col), 0)
 
+    kernel = np.ones((5,5),np.uint8)
+    dilation = cv.erode(randomMap,kernel,iterations = 10)
     return randomMap
 
 
@@ -34,7 +36,7 @@ def displayImage(img):
 
 
 def main():
-    randomMap = generateRandomImage(size=(300, 300))
+    randomMap = generateRandomImage(size=(600, 600))
     displayImage(randomMap)
     cv.imwrite("rand_normal.png", randomMap)
 

@@ -15,6 +15,12 @@ Note: Numpy array is accessed as (r, c) while a point is (x, y). The
 code follows (r, c) convention everywhere. Hence, be careful whenever
 using a point with opencv.
 """
+def saveStats(stats):
+    with open("state_time.csv", "w") as f:
+        keys, vals = stats.keys(), stats.values()
+        for key, val in zip(keys, vals):
+
+
 
 def main():
     """
@@ -47,13 +53,23 @@ def main():
     print(occMap.shape)
     gridEnv = GridEnvironment(occMap, occMap.shape[0], occMap.shape[1])
     gridEnv.setHeuristicType(0)
+    def abcissaHeuristic(currNode, goalNode):
+        currPoint = gridEnv.getPointFromId(currNode.getNodeId())
+        goalPoint = gridEnv.getPointFromId(goalNode.getNodeId())
+        return abs(currPoint[0] - goalPoint[0])
+
+    def ordinateHeuristic(currNode, goalNode):
+        currPoint = gridEnv.getPointFromId(currNode.getNodeId())
+        goalPoint = gridEnv.getPointFromId(goalNode.getNodeId())
+        return abs(currPoint[1] - goalPoint[1])
+    #gridEnv.setHeuristic(ordinateHeuristic)
 
     # For visualization.
-    viz = ImageVisualizer(occMap, True)
+    viz = ImageVisualizer(occMap, False)
 
     ## To take input by clicking.
-    #startPoint = (100, 20)
-    #goalPoint = (201, 200)
+    #startPoint = (0, 10)
+    #goalPoint = (199, 205)
     #print("Click start point")
     #startPoint = inputClickedPoint(occMap)
     #print("Click end point")
@@ -86,12 +102,16 @@ def main():
         path = path[::-1]
         print("Cost of solution is %f"%path[-1].g)
 
-    pathPoints = []
-    for node in path:
-        pathPoints.append(gridEnv.getPointFromId(node.getNodeId()))
+        pathPoints = []
+        for node in path:
+            pathPoints.append(gridEnv.getPointFromId(node.getNodeId()))
 
-    viz.joinPointsInOrder(pathPoints, thickness=2)
-    viz.displayImage()
+        viz.joinPointsInOrder(pathPoints, thickness=2)
+        viz.displayImage()
+
+        #Save stats.
+        saveStats(planner.getPlanStats)
+
 
 main()
 

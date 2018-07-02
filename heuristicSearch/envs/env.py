@@ -112,6 +112,7 @@ class GridEnvironment(Environment):
         D2 = 1.5
         return D * (dr + dc) + (D2 - 2 * D) * min(dr, dc)
 
+
     def setHeuristicType(self, heuristicType=1):
         self.heuristicType = heuristicType
 
