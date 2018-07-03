@@ -13,6 +13,7 @@ class GridEnvironment(Environment):
         self.rows = rows
         self.cols = cols
         self.graph = {}
+        self.heuristicType = 0
 
     def goal(self, node=None):
         if node:

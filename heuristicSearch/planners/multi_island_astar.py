@@ -1,4 +1,6 @@
 from astar import *
+from ..graph.node import Node
+from ..envs.env import GridEnvironment
 import heapq as Q
 
 class MultiIslandAstar(Astar):
@@ -45,8 +47,8 @@ class MultiIslandAstar(Astar):
             if currNode.gValue() + edgeCost < child.gValue():
                 child.g1, child.h1 = currNode.g1, currNode.h1 + edgeCost
                 child.setParent(currNode)
-                print("Dummy child", self.env.fValue(child, self.goalNode,
-                    inflation=1))
+                #print("Dummy child", self.env.fValue(child, self.goalNode,
+                    #inflation=1))
                 Q.heappush(self.Open, (self.env.fValue(child,
                            self.goalNode, inflation=1), child))
 
@@ -61,6 +63,7 @@ class MultiIslandAstar(Astar):
     def _printDummySearchStats(self):
         islandIds = self.env.getIslandIds()
         print("Printing dummy planning related stats.")
+        print("=====================================")
         goal = self.env.graph[self.goalNode.getNodeId()]
         print("Goal: f = %f, g1 = %f, h1 = %f"%(self.env.fValue(goal, goal),
             goal.g1, goal.getH1()))
@@ -70,13 +73,16 @@ class MultiIslandAstar(Astar):
                     self.env.fValue(node, self.goalNode), node.gValue(), node.g1,
                     node.getH1()))
         print("Nodes expanded: %d"%len(self.Closed.keys()))
+        print("First Dummy solution cost: %f = %f + "
+                "%f"%(sum(self._firstDummySolnCost),
+                    self._firstDummySolnCost[0], self._firstDummySolnCost[1]))
+        print("====================================")
 
 
     #@profile
     def plan(self, startNode, goalNode, viz=None):
         self.startNode = startNode
         self.goalNode = goalNode
-        print(goalNode.getNodeId())
 
         # Ordered List of expanded sates and their timestamps.
         stateTimeStamps = collections.OrderedDict()
@@ -92,6 +98,7 @@ class MultiIslandAstar(Astar):
                 inflation=1), startNode))
         startTime = time.time()
 
+        # XXX First Solution
         # Dummy Planning
         def _dummyPlanning():
             currNode = self.Open[0][1]
@@ -123,20 +130,24 @@ class MultiIslandAstar(Astar):
                 self._expand1(currNode)
                 self.Closed[nodeId] = 1
                 stateTimeStamps[nodeId] = (time.time(), currNode.getH())
+                viz.markPoint(self.env.getPointFromId(currNode.getNodeId()), 100)
                 if viz.incrementalDisplay:
-                    viz.markPoint(self.env.getPointFromId(currNode.getNodeId()), 100)
                     viz.displayImage(1)
             print("Dummy planning done.")
 
         _dummyPlanning()
+        # Save dummy planning related stats.
+        self._firstDummySolnCost = (self.env.graph[goalNode.getNodeId()].g1,
+                                    self.env.graph[goalNode.getNodeId()].getH1())
         self._printDummySearchStats()
         viz.saveImage("dummy_planning.jpg")
 
         # Refinement
+        #"""
         def _findFirstIsland(goalNode):
             currNode = self.env.graph[goalNode.getNodeId()]
             path = []
-            while(currNode != startNode):
+            while(currNode.getNodeId() != startNode.getNodeId()):
                 path.append(currNode)
                 currNode = currNode.getParent()
             # Reverse the list.
@@ -154,24 +165,16 @@ class MultiIslandAstar(Astar):
             # h1 cost from entry to island
             h1Decrement = island.h1 - entry.h1
             index = self.env.getIslandIds().index(island.getNodeId())
-            queue = self.IslandOpen[index]
-            Q.heappush(queue, (self.env.fValue(entry, island), entry))
 
-            #print(queue[0][0], self.inflation*self.env.heuristic(startNode,
-                    #queue[0][1]))
             # Start A*
-            node = entry
             print("Starting Refinement")
-            while(queue[0][0] <= self.env.islandRegions[index].inflation*self.env.fValue(island,
-                    goalNode) and node.getNodeId() != island.getNodeId()):
-                _, node = Q.heappop(queue)
-                if node.getNodeId() in self.islandClosed:
-                    continue
-                self._expand2(node, island, queue)
-                self.islandClosed[node.getNodeId()] = 1
-                if viz.incrementalDisplay:
-                    viz.markPoint(self.env.getPointFromId(node.getNodeId()), 100)
-                    viz.displayImage(1)
+            # We need to construct new objects for the new search graph.
+            start = Node(entry.getNodeId())
+            goal = Node(island.getNodeId())
+            islandEnv = GridEnvironment(self.env.envMap, \
+                    self.env.envMap.shape[0], self.env.envMap.shape[1])
+            islandPlanner = Astar(islandEnv, inflation=1)
+            success = islandPlanner.plan(start, goal, viz=viz)
 
             def _updateNodesInPath(path, island, g1Increment, h1Decrement):
                 index = path.index(island)
@@ -180,11 +183,13 @@ class MultiIslandAstar(Astar):
                     vertex.g1 += g1Increment
                     vertex.h1 -= h1Decrement
 
-            if node.getNodeId() == island.getNodeId():
+            if success:
                 # Dummy path refined.
-                g1Increment = island.g1 - entry.g1
+                g1Increment = islandEnv.graph[goal.getNodeId()].gValue()
                 _updateNodesInPath(path, island, g1Increment, h1Decrement)
             else:
+                raise ValueError("Dummy edge could not be refined.")
+                """
                 # Alternate path being explored.
                 # XXX What if goal is reached?
                 minCost, minNode = queue[0]
@@ -202,7 +207,8 @@ class MultiIslandAstar(Astar):
 
                 # Find another path to the goal.
                 _dummyPlanning()
-
+                """
+        #"""
         self.stateTimeStamps = stateTimeStamps
 
         endTime = time.time()

@@ -18,14 +18,11 @@ code follows (r, c) convention everywhere. Hence, be careful whenever
 using a point with opencv.
 """
 
-def constructIslandRegions(env, folder, radius=20, inflation=10):
+def constructIslandRegions(env, islandPoints, radii, inflation=10):
     """Construct island regions using saved island coordinates and region
     specifications."""
-    islandsFile = folder + "/islands.pkl"
-    islandPoints = pickle.load(open(islandsFile, "rb"))
-    print(islandPoints)
     islandRegions = []
-    for islandPoint in islandPoints:
+    for radius, islandPoint in zip(radii, islandPoints):
         node = Node(env.getIdFromPoint(islandPoint))
         circularRegion = CircularRegion(islandPoint, radius)
         islandRegion = IslandRegion(node, circularRegion)
@@ -59,12 +56,16 @@ def main():
     assert(gridEnv.isValidPoint(goalPoint))
 
     # Set up island regions.
-    islandRegions = constructIslandRegions(gridEnv, folder, radius=61,
+    islandsFile = folder + "/islands.pkl"
+    islandPoints = pickle.load(open(islandsFile, "rb"))
+    radii = [45 for island in islandPoints]
+    radii[0] = 100
+    islandRegions = constructIslandRegions(gridEnv, islandPoints, radii=radii,
             inflation=1.2)
     gridEnv.islandRegions = islandRegions
 
     # For visualization.
-    viz = ImageVisualizer(occMap, True)
+    viz = ImageVisualizer(occMap, False)
     makePrettyViz(viz, islandRegions, startPoint, goalPoint)
 
     startNode = Node(gridEnv.getIdFromPoint(startPoint))

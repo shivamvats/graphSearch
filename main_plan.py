@@ -15,12 +15,6 @@ Note: Numpy array is accessed as (r, c) while a point is (x, y). The
 code follows (r, c) convention everywhere. Hence, be careful whenever
 using a point with opencv.
 """
-def saveStats(stats):
-    with open("state_time.csv", "w") as f:
-        keys, vals = stats.keys(), stats.values()
-        for key, val in zip(keys, vals):
-
-
 
 def main():
     """
@@ -108,10 +102,6 @@ def main():
 
         viz.joinPointsInOrder(pathPoints, thickness=2)
         viz.displayImage()
-
-        #Save stats.
-        saveStats(planner.getPlanStats)
-
 
 main()
 

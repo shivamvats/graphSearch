@@ -125,7 +125,7 @@ class PeakFinder:
         goalNode = Node(self.gridEnv.getIdFromPoint(goalPoint))
         self.gridEnv.addNode(goalNode)
 
-        planner = Astar(self.gridEnv)
+        planner = Astar(self.gridEnv, inflation=1)
         planFound = planner.plan(startNode, goalNode, viz=viz)
 
         path = []
@@ -189,7 +189,7 @@ class PeakFinder:
         pathPlanTime = [ planStats[node][0] for node in planNodeIds ]
         # Peaks has the node ids sorted according to the delta t.
         peaks = self.getTimePeaks( planNodeIds, pathPlanTime )
-        timePeaks = peaks#[:NUMTIMEPEAKS]
+        timePeaks = peaks[:3]
 
         # Extract the heuristic values.
         pathPlanHeuristic= [ planStats[node][1] for node in planNodeIds ]
