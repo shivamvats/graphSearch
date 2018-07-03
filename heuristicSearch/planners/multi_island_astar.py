@@ -156,6 +156,7 @@ class MultiIslandAstar(Astar):
             island = next(node for node in path if node.h1 > 0)
             return (path, island)
 
+        self._dummyEdgeCosts, self._refinementCosts = [], []
         goalNode = self.env.graph[goalNode.getNodeId()]
         while goalNode.h1 > 0:
             # Find first island.
@@ -164,6 +165,7 @@ class MultiIslandAstar(Astar):
 
             # h1 cost from entry to island
             h1Decrement = island.h1 - entry.h1
+            self._dummyEdgeCosts.append(h1Decrement)
             index = self.env.getIslandIds().index(island.getNodeId())
 
             # Start A*
@@ -185,7 +187,8 @@ class MultiIslandAstar(Astar):
 
             if success:
                 # Dummy path refined.
-                g1Increment = islandEnv.graph[goal.getNodeId()].gValue()
+                g1Increment = islandEnv.graph[goal.getNodeId()].g
+                self._refinementCosts.append(g1Increment)
                 _updateNodesInPath(path, island, g1Increment, h1Decrement)
             else:
                 raise ValueError("Dummy edge could not be refined.")
@@ -214,8 +217,11 @@ class MultiIslandAstar(Astar):
         endTime = time.time()
         timeTaken = endTime - startTime
         print("Total time taken for planning is %f", timeTaken)
-        #print(self.stateTimeStamps)
-        print("Nodes expanded", len(self.Closed) + len(self.islandClosed))
+
+        print("First solution cost: %f"%(self._firstDummySolnCost[0] +
+                sum(self._refinementCosts)))
+        print("Sub-optimality upper bound: %f"%((self._firstDummySolnCost[0] +
+                sum(self._refinementCosts))/sum(self._firstDummySolnCost)))
 
         closedNodeIds = list(self.Closed.keys())
         points = map(self.env.getPointFromId, closedNodeIds)

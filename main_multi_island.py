@@ -58,8 +58,7 @@ def main():
     # Set up island regions.
     islandsFile = folder + "/islands.pkl"
     islandPoints = pickle.load(open(islandsFile, "rb"))
-    radii = [45 for island in islandPoints]
-    radii[0] = 100
+    radii = [70 for island in islandPoints]
     islandRegions = constructIslandRegions(gridEnv, islandPoints, radii=radii,
             inflation=1.2)
     gridEnv.islandRegions = islandRegions
