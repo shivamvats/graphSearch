@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import pickle
 import sys
 
-from heuristicSearch.envs.occupancyGrid import OccupancyGrid
+from heuristicSearch.envs.occupancy_grid import OccupancyGrid
 
 clickedR, clickedC = -1, -1
 def inputClickedPoint(image):
