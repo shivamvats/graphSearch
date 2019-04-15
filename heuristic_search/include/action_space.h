@@ -1,6 +1,7 @@
 
 using namespace std;
 using Action = vector<double>;
+using Actions = vector<Action>;
 
 class ActionSpace {
     public:
