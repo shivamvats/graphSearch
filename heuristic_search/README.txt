@@ -1,7 +1,12 @@
 Coding Standards
 ================
 
-* Public/Private policy
+* Method/Function naming policy:
+    - camelCase for all methods/functions.
+    - exceptions:
+        - virtual functions start with a capital letter.
+
+* Public/Private policy:
     Nothing is private. Everything is public.
 
 * Getter and Setters

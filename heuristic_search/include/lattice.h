@@ -1,21 +1,27 @@
+#ifndef LATTICE_H
+#define LATTICE_H
+
+#include "types.h"
 
 
-using Node = int;
-
+namespace hsearch {
 /**
  * The Lattice class supports two public methods:
  *  - succs(*)
  *  - edgeCost(*)
  * that are required to traverse the graph.
  */
-class Lattice {
-    public:
-    Lattice();
+    class Lattice {
+        public:
+        Lattice();
 
-    virtual Node succs(const Node a, const Actions actions);
-    virtual float edgeCost(const Node a, const Node b);
+        virtual Node Succs( const Node a, const Actions actions ) = 0;
+        virtual float EdgeCost( const Node a, const Node b ) = 0;
 
-    bool setActions( const Actions actions );
+        bool setActions( const Actions actions );
 
-    Actions m_actions;
-};
+        Actions m_actions;
+    };
+} //namespace hsearch
+
+#endif

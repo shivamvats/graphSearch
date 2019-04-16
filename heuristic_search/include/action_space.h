@@ -1,15 +1,13 @@
+#include "types.h"
 
-using namespace std;
-using Action = vector<double>;
-using Actions = vector<Action>;
+namespace hsearch {
+    class ActionSpace {
+        public:
+        ActionSpace();
 
-class ActionSpace {
-    public:
-    ActionSpace();
+        bool addAction(std::vector<double> delta);
+        vector<Action> getActions();
 
-    bool addAction(vector<double> delta);
-    vector<Action> getActions();
-
-    private:
-    vector<Action> actions;
-};
+        std::vector<Action> m_actions;
+    };
+} // namespace hsearch
